@@ -9,4 +9,13 @@ public abstract class Entity extends GCompound {
 		this.y = y;
 		this.health = health;
 	}
+	
+	public abstract void move();
+	
+	public void takeDamage(int amount) {
+		health -= amount;
+		if (health <= 0) {
+			// Handle entity death
+		}
+	}
 }
