@@ -1,5 +1,6 @@
 import acm.graphics.*;
 
-public class Entity {
-
+public abstract class Entity extends GCompound {
+	protected float x, y;
+	protected int health;
 }
