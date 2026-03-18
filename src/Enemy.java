@@ -14,5 +14,10 @@ public abstract class Enemy extends Entity {
 		appearance = new GImage("enemy.png");
 		add(appearance);
 	}
+	
+	@Override
+	public void move() {
+		// Basic movement placeholder required by Entity
+	}
 
 }
