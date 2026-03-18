@@ -19,5 +19,23 @@ public abstract class Enemy extends Entity {
 	public void move() {
 		// Basic movement placeholder required by Entity
 	}
+	
+	// Implements the chase algorithm
+	// Moves the enemy toward the player's current position.
+	public void moveTowardsPlayer(Player player) {
+		double playerX = player.getX();
+		double playerY = player.getY();
+		
+		// Calculate direction
+		float dx = (float) (playerX - this.x);
+		float dy = (float) (playerY = this.y);
+		
+		// Normalize and move based on speed
+		double distance = Math.sqrt(dx * dx + dy * dy);
+		if (distance > 0) {
+			this.x += (dx / distance) * speed;
+			this.y += (dy / distance) * speed;
+		}
+	}
 
 }
