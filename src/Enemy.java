@@ -36,6 +36,13 @@ public abstract class Enemy extends Entity {
 			this.x += (dx / distance) * speed;
 			this.y += (dy / distance) * speed;
 		}
+		
+		this.setLocation(this.x, this.y);
+	}
+	
+	public void attack(Player player) {
+		// Logic for dealing damage to the player
+		player.takeDamage(this.damage);
 	}
 
 }

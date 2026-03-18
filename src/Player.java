@@ -11,4 +11,9 @@ public class Player {
 		return 0;
 	}
 
+	public void takeDamage(int damage) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
