@@ -22,7 +22,7 @@ public class Maze extends GraphicsProgram {
 	};
 	
 	public void run() {
-		setDifficulty(EASY);
+		setDifficulty(HARD);
 		grid = new int [rows][cols];
 		generateMaze();
 		drawMaze();
