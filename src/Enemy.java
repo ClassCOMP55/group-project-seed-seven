@@ -4,14 +4,41 @@ import java.util.Random;
 public class Enemy extends Entity {
     private int damage;
     private float speed;
+    private EnemyType type;
+    private Random rand = new Random();
 
-    public Enemy(float x, float y, int health, int damage, float speed) {
-        super(x, y, health);
-        this.damage = damage;
-        this.speed = speed;
-        this.x = x;
-        this.y = y;
+    public Enemy(float x, float y, EnemyType type) {
+    	// Initialize with placeholder health, set 
+    	// specifically in initializeStats
+        super(x, y, 0);
+        this.type = type;
+        initializeStats();
         this.setLocation(x, y);
+    }
+    
+    private void initializeStats() {
+    	switch (this.type) {
+    	case SPIDER:
+    		this.health = 10;
+    		this.damage = 5;
+    		this.speed = 8.0f;
+    		break;
+    	case SKELETON:
+    		this.health = 100;
+    		this.damage = 25;
+    		this.speed = 2.0f;
+    		break;
+    	case ALIEN:
+    		this.health = 50;
+    		this.damage = 15;
+    		this.speed = 5.0f;
+    		break;
+    	case MUTANT: // BOSS
+    		this.health = 500;
+    		this.damage = 50;
+    		this.speed = 3.5f;
+    		break;
+    	}
     }
 
     @Override
