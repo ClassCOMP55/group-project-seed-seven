@@ -60,4 +60,16 @@ public class Enemy extends Entity {
             this.setLocation(this.x, this.y);
         }
     }
+    
+    @Override
+    public void takeDamage(int amount) {
+    	this.health -= amount;
+    	if (this.health <= 0) {
+    		handleDeath();
+    	}
+    }
+    
+    private void handleDeath() {
+    	
+    }
 }
