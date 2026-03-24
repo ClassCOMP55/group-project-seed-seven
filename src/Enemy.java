@@ -70,6 +70,32 @@ public class Enemy extends Entity {
     }
     
     private void handleDeath() {
+    	Orb droppedOrb = null;
+    	double roll = rand.nextDouble(); // Generates 0.0 to 1.0
     	
+    	switch (this.type) {
+    	case SPIDER:
+    		if (roll < 0.10) droppedOrb = new Orb(); // 10% chance
+    		break;
+    	case SKELETON:
+    		if (roll < 0.40) droppedOrb = new Orb(); // 40% chance
+    		break;
+    	case ALIEN:
+    		droppedOrb = new Orb(); // 100% chance
+    		break;
+    	case MUTANT:
+    		droppedOrb = new Orb(); // Should the boss drop multiple orbs?
+    		break;
+    	}
+    	
+    	if (droppedOrb != null) {
+    		System.out.println(type + " dropped an EXP orb!");
+    		// Logic to add droppedOrb to the game goes here
+    	}
+    	
+    	// Remove from parent GCanvas or set inactive
+    	if (this.getParent() != null) {
+    		this.getParent().remove(this);
+    	}
     }
 }
