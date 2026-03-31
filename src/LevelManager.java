@@ -21,4 +21,18 @@ public class LevelManager {
 			nextLevel(game);
 		}
 	}
+	
+	// Handle progression logic and trigger the Boss fight on level 4
+	public void nextLevel(Game game) {
+		currentLevel++;
+		
+		if (currentLevel == 4) {
+			// Trigger boss fight on level 4
+			loadBossLevel();
+		} else if (currentLevel < 4) {
+			game.endGame();
+		} else {
+			loadLevel();
+		}
+	}
 }
