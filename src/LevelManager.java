@@ -59,6 +59,22 @@ public class LevelManager {
 			enemies.add(newEnemy);
 		}
 	}
+
+	private void loadLevel() {
+		maze.generateMaze();
+		spawnEnemies();
+	}
 	
-	
+	// Special logic for the MUTANT boss fight on Level 4
+	private void loadBossLevel() {
+		maze.generateMaze();
+		enemies.clear();
+		
+		// Spawn the MUTANT with 500 HP and 50 offense
+		Enemy boss = new Enemy(200.0f, 200.0f, EnemyType.MUTANT);
+		enemies.add(boss);
+		
+		System.out.println("Level 4: Boss Fight Engage!");
+		
+	}
 }
