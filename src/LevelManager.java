@@ -35,4 +35,30 @@ public class LevelManager {
 			loadLevel();
 		}
 	}
+	
+	// Scales enemy types and counts based on the current level
+	public void spawnEnemies() {
+		// Clear previous list  to ensure "all enemies defeated" check works
+		enemies.clear();
+		
+		int enemyCount = 2 + currentLevel; // Scaling quantity per level
+		for (int i = 0; i < enemyCount; i++) {
+			EnemyType type;
+			
+			// Scaling logic for levels 1-3
+			if (currentLevel == 1) {
+				type = EnemyType.SPIDER; // Low difficulty
+			} else if (currentLevel == 2) {
+				type = (i % 2 == 0) ? EnemyType.SPIDER : EnemyType.SKELETON; // Moderate difficulty
+			} else {
+				type = EnemyType.ALIEN; // High difficulty
+			}
+			
+			// Using coordinates (placeholder 100, 100) and the specific type
+			Enemy newEnemy = new Enemy(100.0f, 100.0f, type);
+			enemies.add(newEnemy);
+		}
+	}
+	
+	
 }
