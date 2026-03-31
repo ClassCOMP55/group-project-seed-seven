@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class Maze extends GraphicsProgram {
-	private static final int EASY = 1;
-	private static final int MEDIUM = 2;
-	private static final int HARD = 3;
+	static final int EASY = 1;
+	static final int MEDIUM = 2;
+	static final int HARD = 3;
 	
 	private int rows;
 	private int cols;
@@ -28,7 +28,7 @@ public class Maze extends GraphicsProgram {
 		drawMaze();
 	}
 	
-	private void setDifficulty(int level) {
+	public void setDifficulty(int level) { // Changed to public
 		switch (level) {
 		case EASY:
 			rows = 21;
@@ -48,7 +48,9 @@ public class Maze extends GraphicsProgram {
 			cellSize = 12;
 			break;
 		}
-		setSize(cols * cellSize + 20, rows *cellSize + 40);
+		// setSize(cols * cellSize + 20, rows *cellSize + 40);
+		// removed to avoid the NullPointerException
+		this.grid = new int[rows][cols]; // Grid instantiated
 	}
 	
 	void generateMaze() {

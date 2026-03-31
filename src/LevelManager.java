@@ -61,15 +61,21 @@ public class LevelManager {
 	}
 
 	private void loadLevel() {
-		maze.generateMaze();
+		// Map currentLevel (1-3) to Maze difficulty constants
+		if (currentLevel == 1) maze.setDifficulty(Maze.EASY);
+		else if (currentLevel == 2) maze.setDifficulty(Maze.MEDIUM);
+		else maze.setDifficulty(Maze.HARD);
+		
+		maze.generateMaze(); // grid is now initialized
 		spawnEnemies();
 	}
 	
 	// Special logic for the MUTANT boss fight on Level 4
 	private void loadBossLevel() {
-		maze.generateMaze();
-		enemies.clear();
+		maze.setDifficulty(Maze.HARD); // Initializes the rows, cols, and grid
+		maze.generateMaze(); // Carves the maze using the initialized grid
 		
+		enemies.clear();
 		// Spawn the MUTANT with 500 HP and 50 offense
 		Enemy boss = new Enemy(200.0f, 200.0f, EnemyType.MUTANT);
 		enemies.add(boss);
