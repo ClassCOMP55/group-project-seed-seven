@@ -24,13 +24,13 @@ public class Enemy extends Entity {
     		this.speed = 8.0f;
     		break;
     	case SKELETON:
-    		this.health = 100;
-    		this.damage = 25;
+    		this.health = 50;
+    		this.damage = 15;
     		this.speed = 2.0f;
     		break;
     	case ALIEN:
-    		this.health = 50;
-    		this.damage = 15;
+    		this.health = 100;
+    		this.damage = 25;
     		this.speed = 5.0f;
     		break;
     	case MUTANT: // BOSS
@@ -39,6 +39,27 @@ public class Enemy extends Entity {
     		this.speed = 3.5f;
     		break;
     	}
+    }
+    
+    // -- GETTERS FOR TESTING PURPOSES --
+    /** @return The current health inherited from Entity */
+    public int getHealth() {
+        return this.health;
+    }
+
+    /** @return The movement speed multiplier */
+    public float getSpeed() {
+        return this.speed;
+    }
+
+    /** @return The attack damage value */
+    public int getDamage() {
+        return this.damage;
+    }
+
+    /** @return The specific EnemyType enum value */
+    public EnemyType getType() {
+        return this.type;
     }
 
     @Override
@@ -84,7 +105,7 @@ public class Enemy extends Entity {
     		droppedOrb = new Orb(); // 100% chance
     		break;
     	case MUTANT:
-    		droppedOrb = new Orb(); // Should the boss drop multiple orbs?
+    		droppedOrb = new Orb();
     		break;
     	}
     	
