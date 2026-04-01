@@ -29,6 +29,27 @@ public class Orb extends GCompound {
 		add(appearance);
 	}
 	
+	/**
+	 * Logic for when a player interacts with/collects the orb,
+	 * as defined in the UML and class description.
+	 */
+	public void collect(Player player) {
+		System.out.println("Orb collected! Value: " + value);
+		
+		/**
+		 * Logic to increment the player's EXP
+		 * The report mentions the player's collected orbs
+		 * and has an "orbsCollected" attribute.
+		 */
+		
+		// Remove the orb from the game world
+		if (this.getParent() != null) {
+			this.getParent().remove(this);
+		}
+	}
 	
-
+	// The value of this orb.
+	public int getValue() {
+		return this.value;
+	}
 }
