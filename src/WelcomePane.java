@@ -38,7 +38,20 @@ public class WelcomePane extends GraphicsPane{
 		
 		contents.add(moreButton);
 		mainScreen.add(moreButton);
-
+		
+		GImage settingsButton = new GImage("set_button.png", 200, 400);
+		settingsButton.scale(0.18, 0.18);
+		settingsButton.setLocation(268, 350);
+		
+		contents.add(settingsButton);
+		mainScreen.add(settingsButton);
+		
+		GImage levelsButton = new GImage("lev_button.png", 200, 400);
+		levelsButton.scale(0.18, 0.18);
+		levelsButton.setLocation(405, 350);
+		
+		contents.add(levelsButton);
+		mainScreen.add(levelsButton);
 	}
 	
 	@Override
