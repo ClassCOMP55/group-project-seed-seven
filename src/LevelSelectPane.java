@@ -13,6 +13,8 @@ public class LevelSelectPane extends GraphicsPane{
 		addBackground();
 		addText();
 		addBackButton();
+		addLevelOneButton();
+		addLevelTwoButton();
 	}
 
 	@Override
@@ -51,9 +53,27 @@ public class LevelSelectPane extends GraphicsPane{
 		mainScreen.add(backButton);
 	}
 	
+	private void addLevelOneButton() {
+		GImage backButton = new GImage("level1.png", 200, 400);
+		backButton.scale(0.2, 0.2);
+		backButton.setLocation(250, 190);
+		
+		contents.add(backButton);
+		mainScreen.add(backButton);
+	}
+	
+	private void addLevelTwoButton() {
+		GImage backButton = new GImage("level2.png", 200, 400);
+		backButton.scale(0.2, 0.2);
+		backButton.setLocation(400, 190);
+		
+		contents.add(backButton);
+		mainScreen.add(backButton);
+	}
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(1)) {
+		if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(2)) {
 			mainScreen.switchToWelcomeScreen();
 		}
 	}
