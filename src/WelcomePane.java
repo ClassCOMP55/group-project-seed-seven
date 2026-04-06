@@ -11,7 +11,9 @@ public class WelcomePane extends GraphicsPane{
 	@Override
 	public void showContent() {
 		addPicture();
-		addDescriptionButton();
+		addStartButton();
+		addSettingsButton();
+		addLevelSelectButton();
 	}
 
 	@Override
@@ -25,27 +27,31 @@ public class WelcomePane extends GraphicsPane{
 	private void addPicture(){
 		GImage startImage = new GImage("background.png", 800, 600);
 		startImage.scale(1, 1);
-		startImage.setLocation((mainScreen.getWidth() / mainScreen.getHeight()), (mainScreen.getWidth() / mainScreen.getHeight()));
+		startImage.setLocation(1.33, 1.33);
 		
 		contents.add(startImage);
 		mainScreen.add(startImage);
 	}
 	
-	private void addDescriptionButton() {
-		GImage moreButton = new GImage("s_button.png", 200, 400);
-		moreButton.scale(0.3, 0.3);
-		moreButton.setLocation((mainScreen.getWidth() - moreButton.getWidth())/ 2, 250);
+	private void addStartButton() {
+		GImage startButton = new GImage("s_button.png", 200, 400);
+		startButton.scale(0.3, 0.3);
+		startButton.setLocation((mainScreen.getWidth() - startButton.getWidth())/ 2, 250);
 		
-		contents.add(moreButton);
-		mainScreen.add(moreButton);
-		
+		contents.add(startButton);
+		mainScreen.add(startButton);
+	}
+	
+	private void addSettingsButton() {
 		GImage settingsButton = new GImage("set_button.png", 200, 400);
 		settingsButton.scale(0.18, 0.18);
 		settingsButton.setLocation(268, 350);
 		
 		contents.add(settingsButton);
 		mainScreen.add(settingsButton);
-		
+	}
+	
+	private void addLevelSelectButton() {
 		GImage levelsButton = new GImage("lev_button.png", 200, 400);
 		levelsButton.scale(0.18, 0.18);
 		levelsButton.setLocation(405, 350);
@@ -56,8 +62,15 @@ public class WelcomePane extends GraphicsPane{
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(1)) {
-			mainScreen.switchToDescriptionScreen();
+		GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
+		if (clicked == contents.get(1)) {
+			mainScreen.switchToGameplayScreen();
+		}
+		else if (clicked == contents.get(2)) {
+			mainScreen.switchToSettingsScreen();
+		}
+		else if (clicked == contents.get(3)) {
+			mainScreen.switchToLevelSelectScreen();
 		}
 	}
 

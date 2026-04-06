@@ -12,8 +12,10 @@ public class MainApplication extends GraphicsProgram{
 	
 	//List of all the full screen panes
 	private WelcomePane welcomePane;
-	private DescriptionPane descriptionPane;
+	private GameplayPane gameplayPane;
 	private GraphicsPane currentScreen;
+	private LevelSelectPane levelSelectPane;
+	private SettingsPane settingsScreen;
 
 
 	public MainApplication() {
@@ -31,12 +33,12 @@ public class MainApplication extends GraphicsProgram{
 	}
 	
 	public void run() {
-		System.out.println("Lets' Begin!");
+		System.out.println("Lets' Begin!"); 
 		setupInteractions();
 		
 		//Initialize all Panes
 		welcomePane = new WelcomePane(this);
-		descriptionPane = new DescriptionPane(this);
+		gameplayPane = new GameplayPane(this);
 
 		//TheDefaultPane
 		switchToScreen(welcomePane);
@@ -47,14 +49,21 @@ public class MainApplication extends GraphicsProgram{
 
 	}
 	
-	public void switchToDescriptionScreen() {
-		switchToScreen(descriptionPane);
+	public void switchToGameplayScreen() {
+		switchToScreen(gameplayPane);
+	}
+	
+	public void switchToLevelSelectScreen() {
+		switchToScreen(levelSelectPane);
 	}
 	
 	public void switchToWelcomeScreen() {
 		switchToScreen(welcomePane);
 	}
 	
+	public void switchToSettingsScreen() {
+		switchToScreen(settingsScreen);
+	}
 	
 	protected void switchToScreen(GraphicsPane newScreen) {
 		if(currentScreen != null) {
