@@ -3,6 +3,7 @@ import java.awt.event.MouseEvent;
 import acm.graphics.GImage;
 import acm.graphics.GObject;
 
+
 public class WelcomePane extends GraphicsPane{
 	public WelcomePane(MainApplication mainScreen) {
 		this.mainScreen = mainScreen;
@@ -14,6 +15,7 @@ public class WelcomePane extends GraphicsPane{
 		addStartButton();
 		addSettingsButton();
 		addLevelSelectButton();
+		addLogo();
 	}
 
 	@Override
@@ -31,6 +33,15 @@ public class WelcomePane extends GraphicsPane{
 		
 		contents.add(startImage);
 		mainScreen.add(startImage);
+	}
+	
+	private void addLogo(){
+		GImage logoImage = new GImage("DJlogo.png", 800, 600);
+		logoImage.scale(0.6, 0.6);
+		logoImage.setLocation((mainScreen.getWidth() - logoImage.getWidth())/ 2, 100);
+		
+		contents.add(logoImage);
+		mainScreen.add(logoImage);
 	}
 	
 	private void addStartButton() {
