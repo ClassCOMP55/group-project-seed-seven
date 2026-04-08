@@ -1,92 +1,28 @@
 import java.awt.Color;
-import java.awt.event.MouseEvent;
-
-import acm.graphics.*;
-
-public class GameplayPane extends GraphicsPane{
-	public GameplayPane(MainApplication mainScreen) {
-		this.mainScreen = mainScreen;
-	}
-	
-	@Override
-	public void showContent() {
-		addBackground();
-		addText();
-		addBackButton();
-	}
-
-	@Override
-	public void hideContent() {
-		for(GObject item : contents) {
-			mainScreen.remove(item);
-		}
-		contents.clear();
-	}
-	
-	private void addBackground(){
-		GImage startImage = new GImage("background.png", 800, 600);
-		startImage.scale(1, 1);
-		startImage.setLocation((mainScreen.getWidth() / mainScreen.getHeight()), (mainScreen.getWidth() / mainScreen.getHeight()));
-		
-		contents.add(startImage);
-		mainScreen.add(startImage);
-	}
-	
-	private void addText() {
-		GLabel text = new GLabel("This is an example of a new screen with some description!", 100, 70);
-		text.setColor(Color.BLUE);
-		text.setFont("DialogInput-PLAIN-24");
-		text.setLocation((mainScreen.getWidth() - text.getWidth()) / 2, 70);
-		
-		contents.add(text);
-		mainScreen.add(text);
-	}
-	
-	private void addBackButton() {
-		GImage backButton = new GImage("back.jpg", 200, 400);
-		backButton.scale(0.3, 0.3);
-		backButton.setLocation((mainScreen.getWidth() - backButton.getWidth())/ 2, 400);
-		
-		contents.add(backButton);
-		mainScreen.add(backButton);
-	}
-	
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(2)) {
-			mainScreen.switchToWelcomeScreen();
-		}
-	}
-
-}
-
-/*
-TEMP WASD + COMBAT TEST VERSION OF DESCRIPTIONPANE
-Uncomment only for testing player movement, weapon switching, and combat.
-
-import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import acm.graphics.*;
 
-public class DescriptionPane extends GraphicsPane {
+public class GameplayPane extends GraphicsPane {
 
     private Player player;
     private Enemy testEnemy;
     private GOval enemyMarker;
-    private boolean gameLoopStarted = false;
     private GOval attackEffect;
+    private boolean gameLoopStarted = false;
 
     private GLabel controlsLabel;
     private GLabel weaponLabel;
+    private GLabel statusLabel;
 
-    public DescriptionPane(MainApplication mainScreen) {
+    public GameplayPane(MainApplication mainScreen) {
         this.mainScreen = mainScreen;
     }
 
     @Override
     public void showContent() {
+        addBackground();
         addLabels();
         addBackButton();
         addPlayer();
@@ -106,25 +42,44 @@ public class DescriptionPane extends GraphicsPane {
         testEnemy = null;
     }
 
-    private void addLabels() {
-        controlsLabel = new GLabel("WASD move | SPACE attack | 1 Iron | 2 Laser Sword | 3 Laser Gun | 4 Bow | 5 Axe", 20, 50);
-        controlsLabel.setColor(Color.BLUE);
-        controlsLabel.setFont("DialogInput-PLAIN-18");
+    private void addBackground() {
+        GImage background = new GImage("background.png", 800, 600);
+        background.scale(1, 1);
+        background.setLocation(0, 0);
 
-        weaponLabel = new GLabel("Current Weapon: Iron Sword", 20, 85);
-        weaponLabel.setColor(Color.BLACK);
-        weaponLabel.setFont("DialogInput-BOLD-18");
+        contents.add(background);
+        mainScreen.add(background);
+    }
+
+    private void addLabels() {
+        controlsLabel = new GLabel(
+            "WASD = move   |   SPACE = attack   |   1 Iron   2 Laser Sword   3 Laser Gun   4 Bow   5 Axe",
+            20, 40
+        );
+        controlsLabel.setColor(Color.WHITE);
+        controlsLabel.setFont("DialogInput-BOLD-16");
+
+        weaponLabel = new GLabel("Current Weapon: Iron Sword", 20, 65);
+        weaponLabel.setColor(Color.WHITE);
+        weaponLabel.setFont("DialogInput-BOLD-16");
+
+        statusLabel = new GLabel("Gameplay screen ready", 20, 90);
+        statusLabel.setColor(Color.WHITE);
+        statusLabel.setFont("DialogInput-PLAIN-16");
 
         contents.add(controlsLabel);
         contents.add(weaponLabel);
+        contents.add(statusLabel);
+
         mainScreen.add(controlsLabel);
         mainScreen.add(weaponLabel);
+        mainScreen.add(statusLabel);
     }
 
     private void addBackButton() {
         GImage backButton = new GImage("back.jpg", 200, 400);
         backButton.scale(0.3, 0.3);
-        backButton.setLocation((mainScreen.getWidth() - backButton.getWidth()) / 2, 400);
+        backButton.setLocation((mainScreen.getWidth() - backButton.getWidth()) / 2, 500);
 
         contents.add(backButton);
         mainScreen.add(backButton);
@@ -141,6 +96,7 @@ public class DescriptionPane extends GraphicsPane {
         contents.add(testEnemy);
         mainScreen.add(testEnemy);
 
+        // Visible marker so Moses can later replace this with real visuals
         enemyMarker = new GOval(500, 250, 30, 30);
         enemyMarker.setFilled(true);
         enemyMarker.setFillColor(new Color(128, 0, 128));
@@ -168,7 +124,7 @@ public class DescriptionPane extends GraphicsPane {
                         mainScreen.remove(enemyMarker);
                         contents.remove(enemyMarker);
                         enemyMarker = null;
-                        System.out.println("Enemy defeated.");
+                        statusLabel.setLabel("Enemy defeated");
                     }
                 }
 
@@ -214,7 +170,7 @@ public class DescriptionPane extends GraphicsPane {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(2)) {
+        if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(3)) {
             mainScreen.switchToWelcomeScreen();
         }
     }
@@ -231,22 +187,27 @@ public class DescriptionPane extends GraphicsPane {
         if (key == KeyEvent.VK_1) {
             player.setWeapon(new Weapon("iron sword"));
             updateWeaponLabel();
+            statusLabel.setLabel("Switched to Iron Sword");
         }
         if (key == KeyEvent.VK_2) {
             player.setWeapon(new Weapon("laser sword"));
             updateWeaponLabel();
+            statusLabel.setLabel("Switched to Laser Sword");
         }
         if (key == KeyEvent.VK_3) {
             player.setWeapon(new Weapon("laser gun"));
             updateWeaponLabel();
+            statusLabel.setLabel("Switched to Laser Gun");
         }
         if (key == KeyEvent.VK_4) {
             player.setWeapon(new Weapon("bow and arrow"));
             updateWeaponLabel();
+            statusLabel.setLabel("Switched to Bow and Arrow");
         }
         if (key == KeyEvent.VK_5) {
             player.setWeapon(new Weapon("axe"));
             updateWeaponLabel();
+            statusLabel.setLabel("Switched to Axe");
         }
 
         if (key == KeyEvent.VK_SPACE && testEnemy != null) {
@@ -265,4 +226,3 @@ public class DescriptionPane extends GraphicsPane {
         if (key == KeyEvent.VK_D) player.setRightPressed(false);
     }
 }
-*/

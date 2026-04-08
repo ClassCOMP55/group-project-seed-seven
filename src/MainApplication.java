@@ -1,7 +1,6 @@
 import acm.graphics.GObject;
 import acm.program.*;
 
-
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -16,7 +15,6 @@ public class MainApplication extends GraphicsProgram{
 	private GraphicsPane currentScreen;
 	private LevelSelectPane levelSelectPane;
 	private SettingsPane settingsScreen;
-
 
 	public MainApplication() {
 		super();
@@ -33,12 +31,14 @@ public class MainApplication extends GraphicsProgram{
 	}
 	
 	public void run() {
-		System.out.println("Lets' Begin!"); 
+		System.out.println("Lets' Begin!");
 		setupInteractions();
 		
 		//Initialize all Panes
 		welcomePane = new WelcomePane(this);
 		gameplayPane = new GameplayPane(this);
+		levelSelectPane = new LevelSelectPane(this);
+		settingsScreen = new SettingsPane(this);
 
 		//TheDefaultPane
 		switchToScreen(welcomePane);
@@ -46,7 +46,6 @@ public class MainApplication extends GraphicsProgram{
 	
 	public static void main(String[] args) {
 		new MainApplication().start();
-
 	}
 	
 	public void switchToGameplayScreen() {
@@ -132,5 +131,4 @@ public class MainApplication extends GraphicsProgram{
 			currentScreen.keyTyped(e);
 		}
 	}
-
 }
