@@ -142,6 +142,10 @@ public class Player extends Entity {
         }
         System.out.println("Player took " + damage + " damage. Health: " + health);
     }
+    
+    public void updateAnimation(GImage[] walk) {
+    	
+    }
 
     public Weapon getWeapon() {
         return weapon;
