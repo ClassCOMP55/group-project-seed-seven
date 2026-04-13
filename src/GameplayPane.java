@@ -10,19 +10,32 @@ public class GameplayPane extends GraphicsPane {
     private Enemy testEnemy;
     private GOval enemyMarker;
     private GOval attackEffect;
-    private boolean gameLoopStarted = false;
 
     private GLabel controlsLabel;
     private GLabel weaponLabel;
     private GLabel statusLabel;
 
+    private Maze maze;
+    private int currentDifficulty = Maze.EASY;
+
+    private GImage backButton;
+
+    // controls the active game loop
+    private boolean gameLoopStarted = false;
+    private int loopVersion = 0;
+
     public GameplayPane(MainApplication mainScreen) {
         this.mainScreen = mainScreen;
+    }
+
+    public void setDifficulty(int difficulty) {
+        currentDifficulty = difficulty;
     }
 
     @Override
     public void showContent() {
         addBackground();
+        buildMaze();
         addLabels();
         addBackButton();
         addPlayer();
@@ -32,19 +45,25 @@ public class GameplayPane extends GraphicsPane {
 
     @Override
     public void hideContent() {
+        // stop current loop
+        gameLoopStarted = false;
+        loopVersion++;
+
         for (GObject item : contents) {
             mainScreen.remove(item);
         }
         contents.clear();
-        gameLoopStarted = false;
+
         attackEffect = null;
         enemyMarker = null;
         testEnemy = null;
+        maze = null;
+        backButton = null;
+        player = null;
     }
 
     private void addBackground() {
         GImage background = new GImage("background.png");
-        background.scale(1, 1);
         background.setLocation(0, 0);
 
         mainScreen.add(background);
@@ -52,20 +71,31 @@ public class GameplayPane extends GraphicsPane {
         contents.add(background);
     }
 
+    private void buildMaze() {
+        maze = new Maze();
+        maze.build(currentDifficulty);
+
+        double mazeX = (mainScreen.getWidth() - maze.getMazeWidth()) / 2.0;
+        double mazeY = (mainScreen.getHeight() - maze.getMazeHeight()) / 2.0 + 20;
+
+        maze.setRenderPosition(mazeX, mazeY);
+        maze.renderTo(mainScreen, contents);
+    }
+
     private void addLabels() {
         controlsLabel = new GLabel(
-            "WASD = move   |   SPACE = attack   |   1 Iron   2 Laser Sword   3 Laser Gun   4 Bow   5 Axe",
-            20, 40
+            "WASD = move | SPACE = attack | 6 Level 1 | 7 Level 2 | 8 Level 3",
+            20, 35
         );
-        controlsLabel.setColor(Color.WHITE);
+        controlsLabel.setColor(Color.RED);
         controlsLabel.setFont("DialogInput-BOLD-16");
 
-        weaponLabel = new GLabel("Current Weapon: Iron Sword", 20, 65);
-        weaponLabel.setColor(Color.WHITE);
+        weaponLabel = new GLabel("Current Weapon: Iron Sword", 20, 60);
+        weaponLabel.setColor(Color.RED);
         weaponLabel.setFont("DialogInput-BOLD-16");
 
-        statusLabel = new GLabel("Gameplay screen ready", 20, 90);
-        statusLabel.setColor(Color.WHITE);
+        statusLabel = new GLabel("Gameplay ready", 20, 85);
+        statusLabel.setColor(Color.RED);
         statusLabel.setFont("DialogInput-PLAIN-16");
 
         contents.add(controlsLabel);
@@ -78,27 +108,34 @@ public class GameplayPane extends GraphicsPane {
     }
 
     private void addBackButton() {
-        GImage backButton = new GImage("lev_button.png", 200, 400);
-        backButton.scale(0.2, 0.2);
-        backButton.setLocation((mainScreen.getWidth() - backButton.getWidth()) / 2, 430);
+        backButton = new GImage("back.jpg", 200, 400);
+        backButton.scale(0.3, 0.3);
+        backButton.setLocation((mainScreen.getWidth() - backButton.getWidth()) / 2, 500);
 
         contents.add(backButton);
         mainScreen.add(backButton);
     }
 
     private void addPlayer() {
-        player = new Player(200, 250, 100);
+        int spawnX = (int) maze.getPlayerSpawnX();
+        int spawnY = (int) maze.getPlayerSpawnY();
+
+        player = new Player(spawnX, spawnY, 100);
+        player.setLocation(spawnX, spawnY);
+
         contents.add(player);
         mainScreen.add(player);
     }
 
     private void addEnemy() {
-        testEnemy = new Enemy(500, 250, EnemyType.MUTANT);
+        int enemyX = (int) maze.getEnemySpawnX();
+        int enemyY = (int) maze.getEnemySpawnY();
+
+        testEnemy = new Enemy(enemyX, enemyY, EnemyType.MUTANT);
         contents.add(testEnemy);
         mainScreen.add(testEnemy);
 
-        // Visible marker so Moses can later replace this with real visuals
-        enemyMarker = new GOval(500, 250, 30, 30);
+        enemyMarker = new GOval(enemyX, enemyY, 30, 30);
         enemyMarker.setFilled(true);
         enemyMarker.setFillColor(new Color(128, 0, 128));
         enemyMarker.setColor(Color.BLACK);
@@ -108,14 +145,23 @@ public class GameplayPane extends GraphicsPane {
         enemyMarker.sendToFront();
     }
 
+    private void restartGameplay() {
+        hideContent();
+        showContent();
+    }
+
     private void startGameLoop() {
         if (gameLoopStarted) return;
+
         gameLoopStarted = true;
+        int myLoopVersion = loopVersion;
 
         new Thread(() -> {
-            while (gameLoopStarted) {
-                player.move();
-                player.updateCombat();
+            while (gameLoopStarted && myLoopVersion == loopVersion) {
+                if (player != null && maze != null) {
+                    player.move(maze);
+                    player.updateCombat();
+                }
 
                 if (testEnemy != null && enemyMarker != null) {
                     if (testEnemy.getParent() != null) {
@@ -148,26 +194,22 @@ public class GameplayPane extends GraphicsPane {
 
         switch (player.getFacing()) {
             case "up":
-            	effectX += spriteWidth / 2 - 10;
+                effectX += spriteWidth / 2 - 10;
                 effectY -= 15;
                 break;
-
             case "down":
-            	effectX += spriteWidth / 2 - 10;
+                effectX += spriteWidth / 2 - 10;
                 effectY += spriteHeight - 10;
                 break;
-
             case "left":
-            	effectX -= 20;
+                effectX -= 20;
                 effectY += spriteHeight / 2 - 10;
                 break;
-
             case "right":
-            	effectX += spriteWidth;
+                effectX += spriteWidth;
                 effectY += spriteHeight / 2 - 10;
                 break;
         }
-
 
         attackEffect = new GOval(effectX, effectY, 20, 20);
         attackEffect.setFilled(true);
@@ -197,7 +239,7 @@ public class GameplayPane extends GraphicsPane {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(4)) {
+        if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == backButton) {
             mainScreen.switchToWelcomeScreen();
         }
     }
@@ -205,6 +247,8 @@ public class GameplayPane extends GraphicsPane {
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
+
+        if (player == null) return;
 
         if (key == KeyEvent.VK_W) player.setUpPressed(true);
         if (key == KeyEvent.VK_S) player.setDownPressed(true);
@@ -237,6 +281,22 @@ public class GameplayPane extends GraphicsPane {
             statusLabel.setLabel("Switched to Axe");
         }
 
+        if (key == KeyEvent.VK_6) {
+            currentDifficulty = Maze.EASY;
+            restartGameplay();
+            return;
+        }
+        if (key == KeyEvent.VK_7) {
+            currentDifficulty = Maze.MEDIUM;
+            restartGameplay();
+            return;
+        }
+        if (key == KeyEvent.VK_8) {
+            currentDifficulty = Maze.HARD;
+            restartGameplay();
+            return;
+        }
+
         if (key == KeyEvent.VK_SPACE && testEnemy != null) {
             showAttackEffect();
             player.attack(testEnemy);
@@ -246,6 +306,8 @@ public class GameplayPane extends GraphicsPane {
     @Override
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
+
+        if (player == null) return;
 
         if (key == KeyEvent.VK_W) player.setUpPressed(false);
         if (key == KeyEvent.VK_S) player.setDownPressed(false);

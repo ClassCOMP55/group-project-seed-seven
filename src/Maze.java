@@ -1,106 +1,218 @@
-import acm.graphics.*;
-import acm.program.*;
-import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+
+import acm.graphics.*;
+import acm.program.GraphicsProgram;
 
 public class Maze extends GraphicsProgram {
-	static final int EASY = 1;
-	static final int MEDIUM = 2;
-	static final int HARD = 3;
-	
+	public static final int EASY = 1;
+	public static final int MEDIUM = 2;
+	public static final int HARD = 3;
+
 	private int rows;
 	private int cols;
 	private int cellSize;
-	
-	private int grid[][];
-	
-	private final int DIRS[][] = {
-			{-1, 0}, {1, 0}, {0, -1}, {0, 1}
-	};
-	
+	private int[][] grid;
+	private int currentLevel;
+
+	private double offsetX;
+	private double offsetY;
+
+	public Maze() {
+		offsetX = 0;
+		offsetY = 0;
+		currentLevel = EASY;
+	}
+
 	public void run() {
 		setDifficulty(EASY);
-		grid = new int [rows][cols];
 		generateMaze();
-		drawMaze();
+		renderTo(this, new ArrayList<GObject>());
 	}
-	
-	public void setDifficulty(int level) { // Changed to public
-		switch (level) {
-		case EASY:
-			rows = 21;
-			cols = 21;
-			cellSize = 25;
-			break;
-			
-		case MEDIUM:
-			rows = 31;
-			cols = 31;
-			cellSize = 20;
-			break;
-		
-		case HARD:
-			rows = 51;
-			cols = 51;
-			cellSize = 12;
-			break;
-		}
-		// setSize(cols * cellSize + 20, rows *cellSize + 40);
-		// removed to avoid the NullPointerException
-		this.grid = new int[rows][cols]; // Grid instantiated
-	}
-	
-	void generateMaze() {
-		for(int i = 0; i < rows; i++) {
-			Arrays.fill(grid[i], 1);
-		}
-		carve(0, 0);
-	}
-	
-	private void carve(int r, int c) {
-		grid[r][c] = 0;
-		List<int[]> dirs = new ArrayList<>(Arrays.asList(DIRS));
-		Collections.shuffle(dirs);
-		
-		for (int[] d : dirs) {
-            int nr = r + d[0] * 2;
-            int nc = c + d[1] * 2;
-            
-            if (inBounds(nr, nc) && grid[nr][nc] == 1) {
-                grid[r + d[0]][c + d[1]] = 0;
-                carve(nr, nc);
-            }
-		}
-	}
-	
-	private boolean inBounds(int r, int c) {
-        return r >= 0 && r < rows && c >= 0 && c < cols;
-    }
-	
-	private void drawMaze() {
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
 
-                if (grid[r][c] == 1) {
-                    GRect wall = new GRect(c * cellSize, r * cellSize, cellSize, cellSize);
-                    wall.setFilled(true);
-                    wall.setFillColor(Color.BLACK);
-                    add(wall);
-                } else {
-                    GRect path = new GRect(c * cellSize, r * cellSize, cellSize, cellSize);
-                    path.setFilled(true);
-                    path.setFillColor(Color.WHITE);
-                    add(path);
-                }
-            }
-        }
-    }
-	
-	public static void main(String[] args) {
-	    new Maze().start();
+	public void setDifficulty(int level) {
+		currentLevel = level;
+
+		
+		cellSize = 28;
+	}
+
+	public void generateMaze() {
+		loadPresetMazeByDifficulty();
+	}
+
+	public void build(int level) {
+		setDifficulty(level);
+		generateMaze();
+	}
+
+	private void loadPresetMazeByDifficulty() {
+		if (currentLevel == EASY) {
+			grid = new int[][] {
+				{1,1,1,1,1,1,1,1,1,1,1,1,1},
+				{1,0,0,0,0,0,1,0,0,0,0,0,1},
+				{1,0,1,1,1,0,1,0,1,1,1,0,1},
+				{1,0,1,0,0,0,0,0,0,0,1,0,1},
+				{1,0,1,0,1,1,1,1,1,0,1,0,1},
+				{1,0,0,0,1,0,0,0,1,0,0,0,1},
+				{1,1,1,0,1,0,1,0,1,1,1,0,1},
+				{1,0,0,0,1,0,1,0,0,0,1,0,1},
+				{1,0,1,1,1,0,1,1,1,0,1,0,1},
+				{1,0,0,0,0,0,0,0,1,0,0,0,1},
+				{1,1,1,1,1,1,1,1,1,1,1,1,1}
+			};
+		} else if (currentLevel == MEDIUM) {
+			grid = new int[][] {
+				{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+				{1,0,0,0,0,0,1,0,0,0,0,0,0,0,1},
+				{1,0,1,1,1,0,1,0,1,1,1,1,1,0,1},
+				{1,0,1,0,0,0,1,0,1,0,0,0,1,0,1},
+				{1,0,1,0,1,1,1,0,1,0,1,0,1,0,1},
+				{1,0,1,0,0,0,0,0,1,0,1,0,0,0,1},
+				{1,0,1,1,1,1,1,0,1,0,1,1,1,0,1},
+				{1,0,0,0,0,0,1,0,1,0,0,0,1,0,1},
+				{1,1,1,1,1,0,1,0,1,1,1,0,1,0,1},
+				{1,0,0,0,1,0,1,0,0,0,1,0,1,0,1},
+				{1,0,1,0,1,0,1,1,1,0,1,0,1,0,1},
+				{1,0,1,0,0,0,0,0,1,0,0,0,1,0,1},
+				{1,0,1,1,1,1,1,0,1,1,1,1,1,0,1},
+				{1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+				{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+			};
+		} else {
+			grid = new int[][] {
+				{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+				{1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1},
+				{1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1},
+				{1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,1},
+				{1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1},
+				{1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,1},
+				{1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1},
+				{1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1},
+				{1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1},
+				{1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1},
+				{1,0,1,0,1,1,1,0,1,1,1,0,1,0,1,1,1},
+				{1,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1},
+				{1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1},
+				{1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1},
+				{1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1},
+				{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+				{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+			};
+		}
+
+		rows = grid.length;
+		cols = grid[0].length;
+	}
+
+	public void setRenderPosition(double x, double y) {
+		offsetX = x;
+		offsetY = y;
+	}
+
+	public void renderTo(GraphicsProgram screen, ArrayList<GObject> contents) {
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				GRect tile = new GRect(
+					offsetX + c * cellSize,
+					offsetY + r * cellSize,
+					cellSize,
+					cellSize
+				);
+				tile.setFilled(true);
+
+				if (grid[r][c] == 1) {
+					tile.setFillColor(java.awt.Color.BLACK);
+					tile.setColor(java.awt.Color.BLACK);
+				} else {
+					tile.setFillColor(java.awt.Color.WHITE);
+					tile.setColor(java.awt.Color.WHITE);
+				}
+
+				contents.add(tile);
+				screen.add(tile);
+			}
+		}
+	}
+
+	private boolean isWallAtPixel(double px, double py) {
+		double localX = px - offsetX;
+		double localY = py - offsetY;
+
+		int col = (int)(localX / cellSize);
+		int row = (int)(localY / cellSize);
+
+		if (row < 0 || row >= rows || col < 0 || col >= cols) {
+			return true;
+		}
+
+		return grid[row][col] == 1;
+	}
+
+	public boolean canMoveTo(double x, double y, double width, double height) {
+		double left = x;
+		double right = x + width - 1;
+		double top = y;
+		double bottom = y + height - 1;
+
+		return !isWallAtPixel(left, top)
+			&& !isWallAtPixel(right, top)
+			&& !isWallAtPixel(left, bottom)
+			&& !isWallAtPixel(right, bottom);
+	}
+
+	public double getPlayerSpawnX() {
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (grid[r][c] == 0) {
+					return offsetX + c * cellSize + 2;
+				}
+			}
+		}
+		return offsetX + cellSize;
+	}
+
+	public double getPlayerSpawnY() {
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (grid[r][c] == 0) {
+					return offsetY + r * cellSize + 2;
+				}
+			}
+		}
+		return offsetY + cellSize;
+	}
+
+	public double getEnemySpawnX() {
+		for (int r = rows - 1; r >= 0; r--) {
+			for (int c = cols - 1; c >= 0; c--) {
+				if (grid[r][c] == 0) {
+					return offsetX + c * cellSize + 2;
+				}
+			}
+		}
+		return offsetX + (cols - 2) * cellSize;
+	}
+
+	public double getEnemySpawnY() {
+		for (int r = rows - 1; r >= 0; r--) {
+			for (int c = cols - 1; c >= 0; c--) {
+				if (grid[r][c] == 0) {
+					return offsetY + r * cellSize + 2;
+				}
+			}
+		}
+		return offsetY + (rows - 2) * cellSize;
+	}
+
+	public int getCellSize() {
+		return cellSize;
+	}
+
+	public int getMazeWidth() {
+		return cols * cellSize;
+	}
+
+	public int getMazeHeight() {
+		return rows * cellSize;
 	}
 }
-
