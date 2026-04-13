@@ -15,6 +15,9 @@ public class LevelSelectPane extends GraphicsPane{
 		addBackButton();
 		addLevelOneButton();
 		addLevelTwoButton();
+		addLevelThreeButton();
+		addLevelFourButton();
+		
 	}
 
 	@Override
@@ -45,9 +48,9 @@ public class LevelSelectPane extends GraphicsPane{
 	}
 	
 	private void addBackButton() {
-		GImage backButton = new GImage("back.jpg", 200, 400);
-		backButton.scale(0.3, 0.3);
-		backButton.setLocation((mainScreen.getWidth() - backButton.getWidth())/ 2, 400);
+		GImage backButton = new GImage("back_button.png", 200, 400);
+		backButton.scale(0.2, 0.2);
+		backButton.setLocation((mainScreen.getWidth() - backButton.getWidth())/ 2, 440);
 		
 		contents.add(backButton);
 		mainScreen.add(backButton);
@@ -56,7 +59,7 @@ public class LevelSelectPane extends GraphicsPane{
 	private void addLevelOneButton() {
 		GImage backButton = new GImage("level1.png", 200, 400);
 		backButton.scale(0.2, 0.2);
-		backButton.setLocation(250, 190);
+		backButton.setLocation(250, 160);
 		
 		contents.add(backButton);
 		mainScreen.add(backButton);
@@ -65,7 +68,25 @@ public class LevelSelectPane extends GraphicsPane{
 	private void addLevelTwoButton() {
 		GImage backButton = new GImage("level2.png", 200, 400);
 		backButton.scale(0.2, 0.2);
-		backButton.setLocation(400, 190);
+		backButton.setLocation(400, 160);
+		
+		contents.add(backButton);
+		mainScreen.add(backButton);
+	}
+	
+	private void addLevelThreeButton() {
+		GImage backButton = new GImage("level3.png", 200, 400);
+		backButton.scale(0.2, 0.2);
+		backButton.setLocation(250, 300);
+		
+		contents.add(backButton);
+		mainScreen.add(backButton);
+	}
+	
+	private void addLevelFourButton() {
+		GImage backButton = new GImage("level4.png", 200, 400);
+		backButton.scale(0.2, 0.2);
+		backButton.setLocation(400, 300);
 		
 		contents.add(backButton);
 		mainScreen.add(backButton);
