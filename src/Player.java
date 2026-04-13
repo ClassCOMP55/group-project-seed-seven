@@ -1,7 +1,9 @@
-import acm.graphics.GOval;
-import java.awt.Color;
+import acm.graphics.*;
 
 public class Player extends Entity {
+	
+	private double spriteWidth;
+	private double spriteHeight;
 
     // Movement speed and currently equipped weapon
     private float speed;
@@ -15,6 +17,20 @@ public class Player extends Entity {
 
     // Used to control how often the player can attack
     private int attackCooldownTimer;
+    
+    private GImage appearance;
+
+    private GImage imgIdle;
+    private GImage imgUp;
+    private GImage[] imgDown;
+    private GImage[] imgLeft;
+    private GImage[] imgRight;
+    
+    private int frameIndex = 0;
+    private int frameTimer = 0;
+    private int frameSpeed = 8;
+    
+    private String facing = "right";
 
     public Player(int x, int y, int health) {
         super(x, y, health);
@@ -22,12 +38,31 @@ public class Player extends Entity {
         speed = 4.0f;
         weapon = new Weapon("iron sword");
         attackCooldownTimer = 0;
+        
+        imgIdle = new GImage("char_idle.png");
+        imgUp = new GImage("char_back.png");
+        
+        imgDown = new GImage[] {
+        	   new GImage("char_walk1.png"),
+        	   new GImage("char_walk2.png")
+        };
 
-        // Temporary player visual for testing movement/combat
-        GOval appearance = new GOval(0, 0, 30, 30);
-        appearance.setFilled(true);
-        appearance.setFillColor(Color.RED);
+        imgLeft = new GImage[] {
+        	   new GImage("char_walk1.png"),
+        	   new GImage("char_walk2.png")
+        };
+
+        imgRight = new GImage[] {
+        	   new GImage("char_walk1R.png"),
+        	   new GImage("char_walk2R.png")
+        };
+
+
+        appearance = imgIdle;
         add(appearance);
+        
+        spriteWidth = appearance.getWidth();
+        spriteHeight = appearance.getHeight();
 
         setLocation(x, y);
     }
@@ -35,20 +70,27 @@ public class Player extends Entity {
     @Override
     public void move() {
         // Move player based on which keys are currently being pressed
+    	double newX = getX();
+        double newY = getY();
+
         if (upPressed) {
-            y -= speed;
+        	newY -= speed;
+        	facing = "up";
         }
         if (downPressed) {
-            y += speed;
+        	newY += speed;
+        	facing = "down";
         }
         if (leftPressed) {
-            x -= speed;
+        	newX -= speed;
+        	facing = "left";
         }
         if (rightPressed) {
-            x += speed;
+        	newX += speed;
+        	facing = "right";
         }
 
-        setLocation(x, y);
+        setLocation(newX, newY);
     }
 
     public void updateCombat() {
@@ -92,16 +134,6 @@ public class Player extends Entity {
     }
 
     @Override
-    public double getX() {
-        return x;
-    }
-
-    @Override
-    public double getY() {
-        return y;
-    }
-
-    @Override
     public void takeDamage(int damage) {
         // Reduce player health when attacked by an enemy
         health -= damage;
@@ -109,14 +141,6 @@ public class Player extends Entity {
             health = 0;
         }
         System.out.println("Player took " + damage + " damage. Health: " + health);
-    }
-
-    @Override
-    public void setLocation(double x, double y) {
-        // Keep both Entity coordinates and on-screen position synchronized
-        this.x = (float) x;
-        this.y = (float) y;
-        super.setLocation(x, y);
     }
 
     public Weapon getWeapon() {
@@ -151,4 +175,16 @@ public class Player extends Entity {
     public void setRightPressed(boolean value) {
         rightPressed = value;
     }
+
+	public String getFacing() {
+		return facing;
+	}
+	
+	public double getSpriteWidth() {
+	    return spriteWidth;
+	}
+
+	public double getSpriteHeight() {
+	    return spriteHeight;
+	}
 }

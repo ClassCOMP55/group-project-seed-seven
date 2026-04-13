@@ -43,12 +43,13 @@ public class GameplayPane extends GraphicsPane {
     }
 
     private void addBackground() {
-        GImage background = new GImage("background.png", 800, 600);
+        GImage background = new GImage("background.png");
         background.scale(1, 1);
         background.setLocation(0, 0);
 
-        contents.add(background);
         mainScreen.add(background);
+        background.sendToBack();
+        contents.add(background);
     }
 
     private void addLabels() {
@@ -77,9 +78,9 @@ public class GameplayPane extends GraphicsPane {
     }
 
     private void addBackButton() {
-        GImage backButton = new GImage("back.jpg", 200, 400);
-        backButton.scale(0.3, 0.3);
-        backButton.setLocation((mainScreen.getWidth() - backButton.getWidth()) / 2, 500);
+        GImage backButton = new GImage("lev_button.png", 200, 400);
+        backButton.scale(0.2, 0.2);
+        backButton.setLocation((mainScreen.getWidth() - backButton.getWidth()) / 2, 430);
 
         contents.add(backButton);
         mainScreen.add(backButton);
@@ -139,8 +140,34 @@ public class GameplayPane extends GraphicsPane {
             contents.remove(attackEffect);
         }
 
-        double effectX = player.getX() + 35;
+        double effectX = player.getX();
         double effectY = player.getY();
+
+        double spriteWidth = player.getSpriteWidth();
+        double spriteHeight = player.getSpriteHeight();
+
+        switch (player.getFacing()) {
+            case "up":
+            	effectX += spriteWidth / 2 - 10;
+                effectY -= 15;
+                break;
+
+            case "down":
+            	effectX += spriteWidth / 2 - 10;
+                effectY += spriteHeight - 10;
+                break;
+
+            case "left":
+            	effectX -= 20;
+                effectY += spriteHeight / 2 - 10;
+                break;
+
+            case "right":
+            	effectX += spriteWidth;
+                effectY += spriteHeight / 2 - 10;
+                break;
+        }
+
 
         attackEffect = new GOval(effectX, effectY, 20, 20);
         attackEffect.setFilled(true);
@@ -170,7 +197,7 @@ public class GameplayPane extends GraphicsPane {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(3)) {
+        if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(4)) {
             mainScreen.switchToWelcomeScreen();
         }
     }
