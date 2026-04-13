@@ -68,18 +68,20 @@ public class Enemy extends Entity {
     }
 
     public void moveTowardsPlayer(Player player) {
-        double playerX = player.getX();
+    	double playerX = player.getX();
         double playerY = player.getY();
 
-        double dx = playerX - this.x;
-        double dy = playerY - this.y;
+        double dx = playerX - getX();
+        double dy = playerY - getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
-        
+
         if (distance > 0) {
-            this.x += (float)((dx / distance) * speed);
-            this.y += (float)((dy / distance) * speed);
-            this.setLocation(this.x, this.y);
+            double stepX = (dx / distance) * speed;
+            double stepY = (dy / distance) * speed;
+
+            setLocation(getX() + stepX, getY() + stepY);
         }
+
     }
     
     @Override
