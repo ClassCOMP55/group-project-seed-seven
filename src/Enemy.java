@@ -6,6 +6,8 @@ public class Enemy extends Entity {
     private float speed;
     private EnemyType type;
     private Random rand = new Random();
+    private double width = 20;
+    private double height = 20;
 
     public Enemy(float x, float y, EnemyType type) {
     	// Initialize with placeholder health, set 
@@ -17,6 +19,8 @@ public class Enemy extends Entity {
     }
     
     private void initializeStats() {
+    	this.width = 20;
+    	this.height = 20;
     	switch (this.type) {
     	case SPIDER:
     		this.health = 10;
@@ -67,22 +71,34 @@ public class Enemy extends Entity {
         // Implementation for Entity movement
     }
 
-    public void moveTowardsPlayer(Player player) {
-    	double playerX = player.getX();
-        double playerY = player.getY();
-
-        double dx = playerX - getX();
-        double dy = playerY - getY();
+    public void moveTowardsPlayer(Player player, Maze maze) {
+        double dx = player.getX() - getX();
+        double dy = player.getY() - getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 0) {
             double stepX = (dx / distance) * speed;
             double stepY = (dy / distance) * speed;
 
-            setLocation(getX() + stepX, getY() + stepY);
+         // Try full diagonal movement first
+            if (maze.canMoveTo(getX() + stepX, getY() + stepY, width, height)) {
+                setLocation(getX() + stepX, getY() + stepY);
+            } 
+            // If blocked, try moving ONLY horizontally (Sliding along X)
+            else if (maze.canMoveTo(getX() + stepX, getY(), width, height)) {
+                setLocation(getX() + stepX, getY());
+            } 
+            // If still blocked, try moving ONLY vertically (Sliding along Y)
+            else if (maze.canMoveTo(getX(), getY() + stepY, width, height)) {
+                setLocation(getX(), getY() + stepY);
+            }
         }
-
     }
+    
+    @Override
+    public double getWidth() { return width; }
+    @Override
+    public double getHeight() { return height; }
     
     @Override
     public void takeDamage(int amount) {

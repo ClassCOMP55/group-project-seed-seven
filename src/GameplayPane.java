@@ -158,24 +158,38 @@ public class GameplayPane extends GraphicsPane {
 
         new Thread(() -> {
             while (gameLoopStarted && myLoopVersion == loopVersion) {
+                // Update Player Movement
                 if (player != null && maze != null) {
                     player.move(maze);
                     player.updateCombat();
                 }
 
+                // Update Enemy Logic
                 if (testEnemy != null && enemyMarker != null) {
+                    // Only act if the enemy is still alive (attached to the screen)
                     if (testEnemy.getParent() != null) {
+                        // Pass the maze object so the enemy respects walls
+                        testEnemy.moveTowardsPlayer(player, maze); 
+                        
+                        // Keep the visual purple marker in sync with enemy coordinates
                         enemyMarker.setLocation(testEnemy.getX(), testEnemy.getY());
                         enemyMarker.sendToFront();
+
+                        // Collision Detection
+                        if (player.getBounds().intersects(testEnemy.getBounds())) {
+                            player.takeDamage(testEnemy.getDamage());
+                            statusLabel.setLabel("Ouch! Took " + testEnemy.getDamage() + " damage.");
+                        }
                     } else {
+                        // Cleanup logic when Enemy.java calls handleDeath()
                         mainScreen.remove(enemyMarker);
                         contents.remove(enemyMarker);
                         enemyMarker = null;
-                        statusLabel.setLabel("Enemy defeated");
+                        statusLabel.setLabel("Enemy defeated!");
                     }
                 }
 
-                mainScreen.pause(16);
+                mainScreen.pause(16); // ~60 FPS
             }
         }).start();
     }
