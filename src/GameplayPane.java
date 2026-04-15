@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import acm.graphics.*;
 
@@ -15,6 +16,8 @@ public class GameplayPane extends GraphicsPane {
     private GLabel controlsLabel;
     private GLabel weaponLabel;
     private GLabel statusLabel;
+    
+    private ArrayList<Projectile> projectiles = new ArrayList<>();
 
     public GameplayPane(MainApplication mainScreen) {
         this.mainScreen = mainScreen;
@@ -116,6 +119,31 @@ public class GameplayPane extends GraphicsPane {
             while (gameLoopStarted) {
                 player.move();
                 player.updateCombat();
+                
+                for (int i = 0; i < projectiles.size(); i++) {
+                    Projectile p = projectiles.get(i);
+                    p.move();
+
+                    if (testEnemy != null && p.collidesWith(testEnemy)) {
+                        testEnemy.takeDamage(p.getDamage());
+
+                        mainScreen.remove(p);
+                        contents.remove(p);
+                        projectiles.remove(i);
+                        i--;
+                        continue;
+                    }
+
+                    if (p.getX() < 0 || p.getX() > mainScreen.getWidth() ||
+                        p.getY() < 0 || p.getY() > mainScreen.getHeight()) {
+
+                        mainScreen.remove(p);
+                        contents.remove(p);
+                        projectiles.remove(i);
+                        i--;
+                    }
+                }
+
 
                 if (testEnemy != null && enemyMarker != null) {
                     if (testEnemy.getParent() != null) {
@@ -194,6 +222,37 @@ public class GameplayPane extends GraphicsPane {
     private void updateWeaponLabel() {
         weaponLabel.setLabel("Current Weapon: " + player.getWeapon().getName());
     }
+    
+    private void shootProjectile() {
+
+        double startX = player.getX() + player.getSpriteWidth() / 2;
+        double startY = player.getY() + player.getSpriteHeight() / 2;
+
+        double dx = 0;
+        double dy = 0;
+
+        switch (player.getFacing()) {
+            case "up":
+                dy = -6;
+                break;
+            case "down":
+                dy = 6;
+                break;
+            case "left":
+                dx = -6;
+                break;
+            case "right":
+                dx = 6;
+                break;
+        }
+
+        Projectile p = new Projectile(startX, startY, dx, dy, player.getWeapon().getDamage());
+
+        projectiles.add(p);
+        contents.add(p);
+        mainScreen.add(p);
+    }
+
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -219,6 +278,9 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_2) {
             player.setWeapon(new Weapon("laser sword"));
             updateWeaponLabel();
+            if (player.getWeapon().isRanged()) {
+                shootProjectile();
+            }
             statusLabel.setLabel("Switched to Laser Sword");
         }
         if (key == KeyEvent.VK_3) {
@@ -229,6 +291,9 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_4) {
             player.setWeapon(new Weapon("bow and arrow"));
             updateWeaponLabel();
+            if (player.getWeapon().isRanged()) {
+                shootProjectile();
+            }
             statusLabel.setLabel("Switched to Bow and Arrow");
         }
         if (key == KeyEvent.VK_5) {
@@ -240,6 +305,10 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_SPACE && testEnemy != null) {
             showAttackEffect();
             player.attack(testEnemy);
+        }
+        
+        if (key == KeyEvent.VK_SPACE && player.getWeapon().isRanged()) {
+            shootProjectile();
         }
     }
 

@@ -62,6 +62,10 @@ public class Weapon {
         enemy.takeDamage(damage);
         System.out.println(name + " hit for " + damage + " damage");
     }
+    
+    public boolean isRanged() {
+        return name.equals("Laser Gun") || name.equals("Bow and Arrow");
+    }
 
     public String getName() {
         return name;
