@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import acm.graphics.*;
 
 public class Player extends Entity {
@@ -201,30 +203,35 @@ public class Player extends Entity {
         return attackCooldownTimer == 0;
     }
 
-    public boolean isEnemyInRange(Enemy enemy) {
-        if (enemy == null || weapon == null) return false;
+    public boolean isEnemyInRange(ArrayList<Enemy> enemies) {
+        if (enemies == null || weapon == null) return false;
 
-        double dx = enemy.getX() - this.getX();
-        double dy = enemy.getY() - this.getY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
+        for (Enemy e : enemies) {
+            double dx = e.getX() - this.getX();
+            double dy = e.getY() - this.getY();
+            double distance = Math.sqrt(dx * dx + dy * dy);
 
-        return distance <= weapon.getRange();
+            if (distance <= weapon.getRange()) {
+                return true; // At least one enemy is close enough
+            }
+        }
+        return false;
     }
 
-    public void attack(Enemy enemy) {
-        if (weapon == null || enemy == null) return;
+    public void attack(ArrayList<Enemy> enemies) {
+        if (weapon == null || enemies == null) return;
 
         if (!canAttack()) {
             System.out.println("Weapon is on cooldown.");
             return;
         }
 
-        if (!isEnemyInRange(enemy)) {
+        if (!isEnemyInRange(enemies)) {
             System.out.println("Enemy is out of range.");
             return;
         }
 
-        weapon.attack(enemy);
+        weapon.attack(null, enemies);
         attackCooldownTimer = weapon.getCooldown();
     }
 

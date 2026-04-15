@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Weapon {
 
     // Basic weapon stats used by the player combat system
@@ -54,11 +56,20 @@ public class Weapon {
         }
     }
 
-    public void attack(Enemy enemy) {
-        if (enemy == null) return;
+    public void attack(Player player, ArrayList<Enemy> enemies) {
+        if (enemies == null || player == null) return;
 
-        enemy.takeDamage(damage);
-        System.out.println(name + " hit for " + damage + " damage");
+        for (Enemy e : enemies) {
+            double dx = e.getX() - player.getX();
+            double dy = e.getY() - player.getY();
+            double distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Only damage enemies within the specific weapon's range
+            if (distance <= this.range) {
+                e.takeDamage(damage);
+                System.out.println(name + " hit an enemy for " + damage + " damage");
+            }
+        }
     }
     
     public boolean isRanged() {

@@ -8,8 +8,8 @@ import acm.graphics.*;
 public class GameplayPane extends GraphicsPane {
 
     private Player player;
-    private Enemy testEnemy;
-    private GOval enemyMarker;
+    private ArrayList<Enemy> enemies = new ArrayList<>();
+    private ArrayList<GOval> enemyMarkers = new ArrayList<>();
     private GOval attackEffect;
 
     private GLabel controlsLabel;
@@ -57,13 +57,13 @@ public class GameplayPane extends GraphicsPane {
         }
         contents.clear();
 
+        enemies.clear();
+        enemyMarkers.clear();
+
         attackEffect = null;
-        enemyMarker = null;
-        testEnemy = null;
         maze = null;
         backButton = null;
         player = null;
-        projectiles.clear();
     }
 
     private void addBackground() {
@@ -132,21 +132,54 @@ public class GameplayPane extends GraphicsPane {
     }
 
     private void addEnemy() {
-        int enemyX = (int) maze.getEnemySpawnX();
-        int enemyY = (int) maze.getEnemySpawnY();
+        enemies.clear();
+        enemyMarkers.clear();
 
-        testEnemy = new Enemy(enemyX, enemyY, EnemyType.MUTANT);
-        contents.add(testEnemy);
-        mainScreen.add(testEnemy);
+        int enemyCount = 1;
+        if (currentDifficulty == Maze.MEDIUM) enemyCount = 2;
+        if (currentDifficulty == Maze.HARD) enemyCount = 3;
 
-        enemyMarker = new GOval(enemyX, enemyY, 30, 30);
-        enemyMarker.setFilled(true);
-        enemyMarker.setFillColor(new Color(128, 0, 128));
-        enemyMarker.setColor(Color.BLACK);
+        // Get the base spawn location
+        double startX = maze.getEnemySpawnX();
+        double startY = maze.getEnemySpawnY();
 
-        contents.add(enemyMarker);
-        mainScreen.add(enemyMarker);
-        enemyMarker.sendToFront();
+        for (int i = 0; i < enemyCount; i++) {
+            // Instead of a large offset, use a tiny "jitter" 
+            // This keeps them in the same valid tile but makes them clickable/visible
+            double offsetX = (i * 5); 
+            double offsetY = (i * 5); 
+
+            // Check if the offset position is actually valid in the maze
+            // If the offset is too big and hits a wall, we reset to startX/startY
+            double finalX = startX + offsetX;
+            double finalY = startY + offsetY;
+            
+            // Apply a distinct spread pattern based on which enemy index this is
+            if (i == 1) { // Second enemy shifts slightly right
+                finalX += 12;
+            } else if (i == 2) { // Third enemy shifts slightly down
+                finalY += 12;
+            }
+            
+            // Safety check: if the offset puts them in a wall, just stack them
+            if (!maze.canMoveTo(finalX, finalY, 30, 30)) {
+                finalX = startX;
+                finalY = startY;
+            }
+
+            // Make the markers different colors so you can see them clearly
+            GOval marker = new GOval(finalX, finalY, 30, 30);
+            marker.setFilled(true);
+            
+            // Color coding: Enemy 1 (Purple), Enemy 2 (Blue), Enemy 3 (Red)
+            if (i == 0) marker.setFillColor(new Color(128, 0, 128));
+            else if (i == 1) marker.setFillColor(Color.BLUE);
+            else marker.setFillColor(Color.RED);
+            
+            enemyMarkers.add(marker);
+            contents.add(marker);
+            mainScreen.add(marker);
+        }
     }
 
     private void restartGameplay() {
@@ -161,22 +194,36 @@ public class GameplayPane extends GraphicsPane {
 
         new Thread(() -> {
             while (gameLoopStarted && currentLoopVersion == loopVersion) {
+                // Handle Player Movement
                 if (player != null && maze != null) {
                     player.move(maze);
                     player.updateCombat();
                 }
                 
-                if (testEnemy != null && player != null && maze != null && testEnemy.getParent() != null) {
-                    testEnemy.moveTowardsPlayer(player, maze);
+                // Handle Multiple Enemy Movements
+                // Iterating through the list of enemies instead of a single testEnemy
+                for (Enemy e : enemies) {
+                    if (player != null && maze != null && e.getParent() != null) {
+                        e.moveTowardsPlayer(player, maze);
+                    }
                 }
                 
+                // Handle Projectile Movement and Collisions
                 for (int i = 0; i < projectiles.size(); i++) {
                     Projectile p = projectiles.get(i);
                     p.move();
 
-                    if (testEnemy != null && p.collidesWith(testEnemy)) {
-                        testEnemy.takeDamage(p.getDamage());
+                    boolean projectileHit = false;
+                    // Check collision against all active enemies
+                    for (Enemy e : enemies) {
+                        if (e.getParent() != null && p.collidesWith(e)) {
+                            e.takeDamage(p.getDamage());
+                            projectileHit = true;
+                            break; // Stop checking other enemies for this specific projectile
+                        }
+                    }
 
+                    if (projectileHit) {
                         mainScreen.remove(p);
                         contents.remove(p);
                         projectiles.remove(i);
@@ -184,6 +231,7 @@ public class GameplayPane extends GraphicsPane {
                         continue;
                     }
 
+                    // Remove off-screen projectiles
                     if (p.getX() < 0 || p.getX() > mainScreen.getWidth() ||
                         p.getY() < 0 || p.getY() > mainScreen.getHeight()) {
 
@@ -194,19 +242,30 @@ public class GameplayPane extends GraphicsPane {
                     }
                 }
 
-                if (testEnemy != null && enemyMarker != null) {
-                    if (testEnemy.getParent() != null) {
-                        enemyMarker.setLocation(testEnemy.getX(), testEnemy.getY());
-                        enemyMarker.sendToFront();
+                // Update Enemy Markers and Defeat Logic
+                for (int i = 0; i < enemies.size(); i++) {
+                    Enemy e = enemies.get(i);
+                    GOval m = enemyMarkers.get(i); // Assumes parallel list or mapping
+
+                    if (e.getParent() != null) {
+                        // Update visual marker position
+                        m.setLocation(e.getX(), e.getY());
+                        m.sendToFront();
                     } else {
-                        mainScreen.remove(enemyMarker);
-                        contents.remove(enemyMarker);
-                        enemyMarker = null;
-                        statusLabel.setLabel("Enemy defeated");
+                        // Cleanup defeated enemy and its marker
+                        mainScreen.remove(m);
+                        contents.remove(m);
+                        enemies.remove(i);
+                        enemyMarkers.remove(i);
+                        i--;
+                        
+                        if (enemies.isEmpty()) {
+                            statusLabel.setLabel("All enemies defeated!");
+                        }
                     }
                 }
 
-                mainScreen.pause(16);
+                mainScreen.pause(16); // Maintain ~60 FPS
             }
         }).start();
     }
@@ -365,9 +424,9 @@ public class GameplayPane extends GraphicsPane {
             return;
         }
 
-        if (key == KeyEvent.VK_SPACE && testEnemy != null) {
+        if (key == KeyEvent.VK_SPACE && enemies != null) {
             showAttackEffect();
-            player.attack(testEnemy);
+            player.attack(enemies);
         }
     }
 
