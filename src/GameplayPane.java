@@ -155,12 +155,9 @@ public class GameplayPane extends GraphicsPane {
 
     private void startGameLoop() {
         if (gameLoopStarted) return;
-
         gameLoopStarted = true;
-        int myLoopVersion = loopVersion;
 
         new Thread(() -> {
-<<<<<<< HEAD
             while (gameLoopStarted) {
                 player.move();
                 player.updateCombat();
@@ -189,41 +186,20 @@ public class GameplayPane extends GraphicsPane {
                     }
                 }
 
-=======
-            while (gameLoopStarted && myLoopVersion == loopVersion) {
-                // Update Player Movement
-                if (player != null && maze != null) {
-                    player.move(maze);
-                    player.updateCombat();
-                }
->>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
 
-                // Update Enemy Logic
                 if (testEnemy != null && enemyMarker != null) {
-                    // Only act if the enemy is still alive (attached to the screen)
                     if (testEnemy.getParent() != null) {
-                        // Pass the maze object so the enemy respects walls
-                        testEnemy.moveTowardsPlayer(player, maze); 
-                        
-                        // Keep the visual purple marker in sync with enemy coordinates
                         enemyMarker.setLocation(testEnemy.getX(), testEnemy.getY());
                         enemyMarker.sendToFront();
-
-                        // Collision Detection
-                        if (player.getBounds().intersects(testEnemy.getBounds())) {
-                            player.takeDamage(testEnemy.getDamage());
-                            statusLabel.setLabel("Ouch! Took " + testEnemy.getDamage() + " damage.");
-                        }
                     } else {
-                        // Cleanup logic when Enemy.java calls handleDeath()
                         mainScreen.remove(enemyMarker);
                         contents.remove(enemyMarker);
                         enemyMarker = null;
-                        statusLabel.setLabel("Enemy defeated!");
+                        statusLabel.setLabel("Enemy defeated");
                     }
                 }
 
-                mainScreen.pause(16); // ~60 FPS
+                mainScreen.pause(16);
             }
         }).start();
     }
@@ -242,22 +218,26 @@ public class GameplayPane extends GraphicsPane {
 
         switch (player.getFacing()) {
             case "up":
-                effectX += spriteWidth / 2 - 10;
+            	effectX += spriteWidth / 2 - 10;
                 effectY -= 15;
                 break;
+
             case "down":
-                effectX += spriteWidth / 2 - 10;
+            	effectX += spriteWidth / 2 - 10;
                 effectY += spriteHeight - 10;
                 break;
+
             case "left":
-                effectX -= 20;
+            	effectX -= 20;
                 effectY += spriteHeight / 2 - 10;
                 break;
+
             case "right":
-                effectX += spriteWidth;
+            	effectX += spriteWidth;
                 effectY += spriteHeight / 2 - 10;
                 break;
         }
+
 
         attackEffect = new GOval(effectX, effectY, 20, 20);
         attackEffect.setFilled(true);

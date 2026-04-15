@@ -67,48 +67,29 @@ public class Player extends Entity {
 
     @Override
     public void move() {
-        double newX = getX();
+        // Move player based on which keys are currently being pressed
+    	double newX = getX();
         double newY = getY();
 
         if (upPressed) {
-<<<<<<< HEAD
         	newY -= speed;
         	facing = "up";
         	charDirection(imgUp);
-=======
-            newY -= speed;
-            facing = "up";
->>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
         if (downPressed) {
-<<<<<<< HEAD
         	newY += speed;
         	facing = "down";
         	updateAnimation(imgDown);
-=======
-            newY += speed;
-            facing = "down";
->>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
         if (leftPressed) {
-<<<<<<< HEAD
         	newX -= speed;
         	facing = "left";
         	updateAnimation(imgLeft);
-=======
-            newX -= speed;
-            facing = "left";
->>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
         if (rightPressed) {
-<<<<<<< HEAD
         	newX += speed;
         	facing = "right";
         	updateAnimation(imgRight);
-=======
-            newX += speed;
-            facing = "right";
->>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
 
         setLocation(newX, newY);
@@ -214,7 +195,6 @@ public class Player extends Entity {
     }
     
     public void updateAnimation(GImage[] walk) {
-<<<<<<< HEAD
     	frameTimer++;
 
         if (frameTimer >= frameSpeed) {
@@ -225,8 +205,6 @@ public class Player extends Entity {
             appearance = walk[frameIndex];
             add(appearance);
         }
-=======
->>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
     }
     
     private void charDirection(GImage frames) {
