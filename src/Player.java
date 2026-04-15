@@ -76,18 +76,22 @@ public class Player extends Entity {
         if (upPressed) {
         	newY -= speed;
         	facing = "up";
+        	charDirection(imgUp);
         }
         if (downPressed) {
         	newY += speed;
         	facing = "down";
+        	updateAnimation(imgDown);
         }
         if (leftPressed) {
         	newX -= speed;
         	facing = "left";
+        	updateAnimation(imgLeft);
         }
         if (rightPressed) {
         	newX += speed;
         	facing = "right";
+        	updateAnimation(imgRight);
         }
 
         setLocation(newX, newY);
@@ -144,8 +148,24 @@ public class Player extends Entity {
     }
     
     public void updateAnimation(GImage[] walk) {
-    	
+    	frameTimer++;
+
+        if (frameTimer >= frameSpeed) {
+            frameTimer = 0;
+            frameIndex = (frameIndex + 1) % walk.length;
+
+            remove(appearance);
+            appearance = walk[frameIndex];
+            add(appearance);
+        }
     }
+    
+    private void charDirection(GImage frames) {
+    	remove(appearance);
+        appearance = frames;
+        add(appearance);
+    }
+
 
     public Weapon getWeapon() {
         return weapon;
