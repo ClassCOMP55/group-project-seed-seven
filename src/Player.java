@@ -5,17 +5,14 @@ public class Player extends Entity {
 	private double spriteWidth;
 	private double spriteHeight;
 
-    // Movement speed and currently equipped weapon
     private float speed;
     private Weapon weapon;
 
-    // Movement flags used for WASD input
     private boolean upPressed;
     private boolean downPressed;
     private boolean leftPressed;
     private boolean rightPressed;
 
-    // Used to control how often the player can attack
     private int attackCooldownTimer;
     
     private GImage appearance;
@@ -35,7 +32,7 @@ public class Player extends Entity {
     public Player(int x, int y, int health) {
         super(x, y, health);
 
-        speed = 4.0f;
+        speed = 1.5f;
         weapon = new Weapon("iron sword");
         attackCooldownTimer = 0;
         
@@ -43,22 +40,23 @@ public class Player extends Entity {
         imgUp = new GImage("char_back.png");
         
         imgDown = new GImage[] {
-        	   new GImage("char_walk1.png"),
-        	   new GImage("char_walk2.png")
+            new GImage("char_walk1.png"),
+            new GImage("char_walk2.png")
         };
 
         imgLeft = new GImage[] {
-        	   new GImage("char_walk1.png"),
-        	   new GImage("char_walk2.png")
+            new GImage("char_walk1.png"),
+            new GImage("char_walk2.png")
         };
 
         imgRight = new GImage[] {
-        	   new GImage("char_walk1R.png"),
-        	   new GImage("char_walk2R.png")
+            new GImage("char_walk1R.png"),
+            new GImage("char_walk2R.png")
         };
 
-
         appearance = imgIdle;
+        appearance.scale(0.35, 0.35);
+
         add(appearance);
         
         spriteWidth = appearance.getWidth();
@@ -69,36 +67,107 @@ public class Player extends Entity {
 
     @Override
     public void move() {
-        // Move player based on which keys are currently being pressed
-    	double newX = getX();
+        double newX = getX();
         double newY = getY();
 
         if (upPressed) {
+<<<<<<< HEAD
         	newY -= speed;
         	facing = "up";
         	charDirection(imgUp);
+=======
+            newY -= speed;
+            facing = "up";
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
         if (downPressed) {
+<<<<<<< HEAD
         	newY += speed;
         	facing = "down";
         	updateAnimation(imgDown);
+=======
+            newY += speed;
+            facing = "down";
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
         if (leftPressed) {
+<<<<<<< HEAD
         	newX -= speed;
         	facing = "left";
         	updateAnimation(imgLeft);
+=======
+            newX -= speed;
+            facing = "left";
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
         if (rightPressed) {
+<<<<<<< HEAD
         	newX += speed;
         	facing = "right";
         	updateAnimation(imgRight);
+=======
+            newX += speed;
+            facing = "right";
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         }
 
         setLocation(newX, newY);
     }
 
+    public void move(Maze maze) {
+        double currentX = getX();
+        double currentY = getY();
+        double newX = currentX;
+        double newY = currentY;
+
+        if (upPressed) {
+            newY -= speed;
+            facing = "up";
+        }
+        if (downPressed) {
+            newY += speed;
+            facing = "down";
+        }
+        if (leftPressed) {
+            newX -= speed;
+            facing = "left";
+        }
+        if (rightPressed) {
+            newX += speed;
+            facing = "right";
+        }
+
+        double hitboxWidth = 6;
+        double hitboxHeight = 6;
+
+        double hitboxOffsetX = (spriteWidth - hitboxWidth) / 2.0;
+        double hitboxOffsetY = spriteHeight - hitboxHeight - 1;
+
+        double hitboxX = newX + hitboxOffsetX;
+        double hitboxY = newY + hitboxOffsetY;
+
+        if (maze.canMoveTo(hitboxX, hitboxY, hitboxWidth, hitboxHeight)) {
+            setLocation(newX, newY);
+            return;
+        }
+
+        double xOnlyHitboxX = newX + hitboxOffsetX;
+        double xOnlyHitboxY = currentY + hitboxOffsetY;
+
+        if (maze.canMoveTo(xOnlyHitboxX, xOnlyHitboxY, hitboxWidth, hitboxHeight)) {
+            setLocation(newX, currentY);
+            currentX = newX;
+        }
+
+        double yOnlyHitboxX = currentX + hitboxOffsetX;
+        double yOnlyHitboxY = newY + hitboxOffsetY;
+
+        if (maze.canMoveTo(yOnlyHitboxX, yOnlyHitboxY, hitboxWidth, hitboxHeight)) {
+            setLocation(currentX, newY);
+        }
+    }
+
     public void updateCombat() {
-        // Reduce cooldown over time so the player can attack again later
         if (attackCooldownTimer > 0) {
             attackCooldownTimer--;
         }
@@ -109,7 +178,6 @@ public class Player extends Entity {
     }
 
     public boolean isEnemyInRange(Enemy enemy) {
-        // Check if the enemy is close enough for the current weapon to hit
         if (enemy == null || weapon == null) return false;
 
         double dx = enemy.getX() - this.getX();
@@ -120,7 +188,6 @@ public class Player extends Entity {
     }
 
     public void attack(Enemy enemy) {
-        // Basic combat system: only attack if cooldown is finished and enemy is in range
         if (weapon == null || enemy == null) return;
 
         if (!canAttack()) {
@@ -139,7 +206,6 @@ public class Player extends Entity {
 
     @Override
     public void takeDamage(int damage) {
-        // Reduce player health when attacked by an enemy
         health -= damage;
         if (health < 0) {
             health = 0;
@@ -148,6 +214,7 @@ public class Player extends Entity {
     }
     
     public void updateAnimation(GImage[] walk) {
+<<<<<<< HEAD
     	frameTimer++;
 
         if (frameTimer >= frameSpeed) {
@@ -158,6 +225,8 @@ public class Player extends Entity {
             appearance = walk[frameIndex];
             add(appearance);
         }
+=======
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
     }
     
     private void charDirection(GImage frames) {
@@ -172,7 +241,6 @@ public class Player extends Entity {
     }
 
     public void setWeapon(Weapon weapon) {
-        // Allows weapon switching during testing or gameplay
         this.weapon = weapon;
     }
 
@@ -200,15 +268,15 @@ public class Player extends Entity {
         rightPressed = value;
     }
 
-	public String getFacing() {
-		return facing;
-	}
+    public String getFacing() {
+        return facing;
+    }
 	
-	public double getSpriteWidth() {
-	    return spriteWidth;
-	}
+    public double getSpriteWidth() {
+        return spriteWidth;
+    }
 
-	public double getSpriteHeight() {
-	    return spriteHeight;
-	}
+    public double getSpriteHeight() {
+        return spriteHeight;
+    }
 }
