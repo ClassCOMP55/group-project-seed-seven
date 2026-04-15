@@ -63,6 +63,7 @@ public class GameplayPane extends GraphicsPane {
         maze = null;
         backButton = null;
         player = null;
+        projectiles.clear();
     }
 
     private void addBackground() {
@@ -156,11 +157,18 @@ public class GameplayPane extends GraphicsPane {
     private void startGameLoop() {
         if (gameLoopStarted) return;
         gameLoopStarted = true;
+        int currentLoopVersion = loopVersion;
 
         new Thread(() -> {
-            while (gameLoopStarted) {
-                player.move();
-                player.updateCombat();
+            while (gameLoopStarted && currentLoopVersion == loopVersion) {
+                if (player != null && maze != null) {
+                    player.move(maze);
+                    player.updateCombat();
+                }
+                
+                if (testEnemy != null && player != null && maze != null && testEnemy.getParent() != null) {
+                    testEnemy.moveTowardsPlayer(player, maze);
+                }
                 
                 for (int i = 0; i < projectiles.size(); i++) {
                     Projectile p = projectiles.get(i);
@@ -185,7 +193,6 @@ public class GameplayPane extends GraphicsPane {
                         i--;
                     }
                 }
-
 
                 if (testEnemy != null && enemyMarker != null) {
                     if (testEnemy.getParent() != null) {
@@ -238,7 +245,6 @@ public class GameplayPane extends GraphicsPane {
                 break;
         }
 
-
         attackEffect = new GOval(effectX, effectY, 20, 20);
         attackEffect.setFilled(true);
         attackEffect.setFillColor(Color.YELLOW);
@@ -266,7 +272,6 @@ public class GameplayPane extends GraphicsPane {
     }
     
     private void shootProjectile() {
-
         double startX = player.getX() + player.getSpriteWidth() / 2;
         double startY = player.getY() + player.getSpriteHeight() / 2;
 
@@ -295,7 +300,6 @@ public class GameplayPane extends GraphicsPane {
         mainScreen.add(p);
     }
 
-
     @Override
     public void mouseClicked(MouseEvent e) {
         if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == backButton) {
@@ -322,9 +326,6 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_2) {
             player.setWeapon(new Weapon("laser sword"));
             updateWeaponLabel();
-            if (player.getWeapon().isRanged()) {
-                shootProjectile();
-            }
             statusLabel.setLabel("Switched to Laser Sword");
         }
         if (key == KeyEvent.VK_3) {
@@ -335,9 +336,6 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_4) {
             player.setWeapon(new Weapon("bow and arrow"));
             updateWeaponLabel();
-            if (player.getWeapon().isRanged()) {
-                shootProjectile();
-            }
             statusLabel.setLabel("Switched to Bow and Arrow");
         }
         if (key == KeyEvent.VK_5) {
@@ -362,13 +360,14 @@ public class GameplayPane extends GraphicsPane {
             return;
         }
 
+        if (key == KeyEvent.VK_SPACE && player.getWeapon().isRanged()) {
+            shootProjectile();
+            return;
+        }
+
         if (key == KeyEvent.VK_SPACE && testEnemy != null) {
             showAttackEffect();
             player.attack(testEnemy);
-        }
-        
-        if (key == KeyEvent.VK_SPACE && player.getWeapon().isRanged()) {
-            shootProjectile();
         }
     }
 

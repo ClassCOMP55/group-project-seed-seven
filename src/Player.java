@@ -2,6 +2,8 @@ import acm.graphics.*;
 
 public class Player extends Entity {
 	
+	private static final double SPRITE_SCALE = 0.35;
+
 	private double spriteWidth;
 	private double spriteHeight;
 
@@ -54,8 +56,22 @@ public class Player extends Entity {
             new GImage("char_walk2R.png")
         };
 
+        // Scale all sprites so animation frames stay the same size
+        imgIdle.scale(SPRITE_SCALE, SPRITE_SCALE);
+        imgUp.scale(SPRITE_SCALE, SPRITE_SCALE);
+
+        for (GImage img : imgDown) {
+            img.scale(SPRITE_SCALE, SPRITE_SCALE);
+        }
+        for (GImage img : imgLeft) {
+            img.scale(SPRITE_SCALE, SPRITE_SCALE);
+        }
+        for (GImage img : imgRight) {
+            img.scale(SPRITE_SCALE, SPRITE_SCALE);
+        }
+
         appearance = imgIdle;
-        appearance.scale(0.35, 0.35);
+        appearance.setLocation(0, 0);
 
         add(appearance);
         
@@ -67,29 +83,39 @@ public class Player extends Entity {
 
     @Override
     public void move() {
-        // Move player based on which keys are currently being pressed
-    	double newX = getX();
+        double newX = getX();
         double newY = getY();
+        boolean moved = false;
 
         if (upPressed) {
         	newY -= speed;
         	facing = "up";
         	charDirection(imgUp);
+        	moved = true;
         }
         if (downPressed) {
         	newY += speed;
         	facing = "down";
         	updateAnimation(imgDown);
+        	moved = true;
         }
         if (leftPressed) {
         	newX -= speed;
         	facing = "left";
         	updateAnimation(imgLeft);
+        	moved = true;
         }
         if (rightPressed) {
         	newX += speed;
         	facing = "right";
         	updateAnimation(imgRight);
+        	moved = true;
+        }
+
+        if (!moved) {
+            charDirection(imgIdle);
+            frameIndex = 0;
+            frameTimer = 0;
         }
 
         setLocation(newX, newY);
@@ -100,29 +126,46 @@ public class Player extends Entity {
         double currentY = getY();
         double newX = currentX;
         double newY = currentY;
+        boolean moved = false;
 
         if (upPressed) {
             newY -= speed;
             facing = "up";
+            charDirection(imgUp);
+            moved = true;
         }
         if (downPressed) {
             newY += speed;
             facing = "down";
+            updateAnimation(imgDown);
+            moved = true;
         }
         if (leftPressed) {
             newX -= speed;
             facing = "left";
+            updateAnimation(imgLeft);
+            moved = true;
         }
         if (rightPressed) {
             newX += speed;
             facing = "right";
+            updateAnimation(imgRight);
+            moved = true;
         }
 
-        double hitboxWidth = 6;
-        double hitboxHeight = 6;
+        if (!moved) {
+            charDirection(imgIdle);
+            frameIndex = 0;
+            frameTimer = 0;
+            return;
+        }
+
+        // Slightly bigger hitbox so player can't slip out as easily
+        double hitboxWidth = 10;
+        double hitboxHeight = 10;
 
         double hitboxOffsetX = (spriteWidth - hitboxWidth) / 2.0;
-        double hitboxOffsetY = spriteHeight - hitboxHeight - 1;
+        double hitboxOffsetY = spriteHeight - hitboxHeight - 2;
 
         double hitboxX = newX + hitboxOffsetX;
         double hitboxY = newY + hitboxOffsetY;
@@ -203,16 +246,25 @@ public class Player extends Entity {
 
             remove(appearance);
             appearance = walk[frameIndex];
+            appearance.setLocation(0, 0);
             add(appearance);
+
+            spriteWidth = appearance.getWidth();
+            spriteHeight = appearance.getHeight();
         }
     }
     
     private void charDirection(GImage frames) {
+    	if (appearance == frames) return;
+
     	remove(appearance);
         appearance = frames;
+        appearance.setLocation(0, 0);
         add(appearance);
-    }
 
+        spriteWidth = appearance.getWidth();
+        spriteHeight = appearance.getHeight();
+    }
 
     public Weapon getWeapon() {
         return weapon;
