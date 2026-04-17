@@ -139,39 +139,30 @@ public class GameplayPane extends GraphicsPane {
         if (currentDifficulty == Maze.MEDIUM) enemyCount = 2;
         if (currentDifficulty == Maze.HARD) enemyCount = 3;
 
-        // Get the base spawn location
         double startX = maze.getEnemySpawnX();
         double startY = maze.getEnemySpawnY();
 
         for (int i = 0; i < enemyCount; i++) {
-            // Instead of a large offset, use a tiny "jitter" 
-            // This keeps them in the same valid tile but makes them clickable/visible
-            double offsetX = (i * 5); 
-            double offsetY = (i * 5); 
-
-            // Check if the offset position is actually valid in the maze
-            // If the offset is too big and hits a wall, we reset to startX/startY
-            double finalX = startX + offsetX;
-            double finalY = startY + offsetY;
+            double finalX = startX + (i * 5);
+            double finalY = startY + (i * 5);
             
-            // Apply a distinct spread pattern based on which enemy index this is
-            if (i == 1) { // Second enemy shifts slightly right
-                finalX += 12;
-            } else if (i == 2) { // Third enemy shifts slightly down
-                finalY += 12;
-            }
+            if (i == 1) finalX += 12;
+            else if (i == 2) finalY += 12;
             
-            // Safety check: if the offset puts them in a wall, just stack them
             if (!maze.canMoveTo(finalX, finalY, 30, 30)) {
                 finalX = startX;
                 finalY = startY;
             }
 
-            // Make the markers different colors so you can see them clearly
+            // --- NEW CODE: CREATE THE ACTUAL ENEMY ---
+            // This adds the logic-bearing object to the list so the game loop can find it
+            Enemy newEnemy = new Enemy((int)finalX, (int)finalY, EnemyType.MUTANT);
+            enemies.add(newEnemy); 
+            // -----------------------------------------
+
+            // Keep your existing marker code for visual tracking
             GOval marker = new GOval(finalX, finalY, 30, 30);
             marker.setFilled(true);
-            
-            // Color coding: Enemy 1 (Purple), Enemy 2 (Blue), Enemy 3 (Red)
             if (i == 0) marker.setFillColor(new Color(128, 0, 128));
             else if (i == 1) marker.setFillColor(Color.BLUE);
             else marker.setFillColor(Color.RED);
@@ -202,10 +193,8 @@ public class GameplayPane extends GraphicsPane {
                 
                 // Handle Multiple Enemy Movements
                 // Iterating through the list of enemies instead of a single testEnemy
-                for (Enemy e : enemies) {
-                    if (player != null && maze != null && e.getParent() != null) {
-                        e.moveTowardsPlayer(player, maze);
-                    }
+                for (Enemy enemy : enemies) {
+                    enemy.moveTowardsPlayer(player, maze);
                 }
                 
                 // Handle Projectile Movement and Collisions

@@ -3,17 +3,21 @@ import java.util.Random;
 
 public class Enemy extends Entity {
     private int damage;
-    private float speed;
+    private double speed;
     private EnemyType type;
     private Random rand = new Random();
+    public static final int MUTANT = 1;
 
-    public Enemy(float x, float y, EnemyType type) {
-        // Initialize with placeholder health, set
-        // specifically in initializeStats
-        super(x, y, 0);
+ // 1. Change 'int type' to 'EnemyType type'
+    public Enemy(int x, int y, EnemyType type) {
+        // 2. Fix the "Implicit super constructor" error by calling super()
+        // We pass x, y, and a starting health value (e.g., 100) to the Entity constructor
+        super(x, y, 100); 
+
         this.type = type;
         initializeStats();
-        this.setLocation(x, y);
+        
+        // This is where you would normally add your GImage/Sprite
     }
 
     private void initializeStats() {
@@ -47,7 +51,7 @@ public class Enemy extends Entity {
     }
 
     public float getSpeed() {
-        return this.speed;
+        return (float) this.speed;
     }
 
     public int getDamage() {
@@ -82,81 +86,26 @@ public class Enemy extends Entity {
 
     // Maze-aware version
     public void moveTowardsPlayer(Player player, Maze maze) {
-        if (player == null || maze == null) return;
+        if (player == null) return;
 
-        double currentX = getX();
-        double currentY = getY();
-        double playerX = player.getX();
-        double playerY = player.getY();
+        double curX = getX();
+        double curY = getY();
+        double dx = player.getX() - curX;
+        double dy = player.getY() - curY;
+        double dist = Math.sqrt(dx * dx + dy * dy);
 
-        double dx = playerX - currentX;
-        double dy = playerY - currentY;
-        double distance = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) return;
 
-        if (distance <= 0) return;
+        // We use a hardcoded speed of 3.0. 
+        // This ignores whatever 'this.speed' is set to.
+        double stepX = (dx / dist) * 3.0;
+        double stepY = (dy / dist) * 3.0;
 
-        // Prevent the enemy from snapping directly onto the player
-        double stopDistance = 14.0;
-        if (distance < stopDistance) return;
-
-        // Slow down a bit when the enemy gets close
-        double moveSpeed = speed;
-        if (distance < 60) {
-            moveSpeed = Math.max(1.0, speed * 0.55);
-        }
-
-        double normX = dx / distance;
-        double normY = dy / distance;
-
-        double stepX = normX * moveSpeed;
-        double stepY = normY * moveSpeed;
-
-        // Smaller collision box so enemy fits inside paths
-        double hitboxWidth = 18;
-        double hitboxHeight = 18;
-        double hitboxOffsetX = 6;
-        double hitboxOffsetY = 6;
-
-        // 1. direct move
-        if (tryMove(currentX + stepX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-            return;
-        }
-
-        boolean xPriority = Math.abs(dx) >= Math.abs(dy);
-
-        // 2. try dominant axis first
-        if (xPriority) {
-            if (tryMove(currentX + stepX, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-                return;
-            }
-            if (tryMove(currentX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-                return;
-            }
-        } else {
-            if (tryMove(currentX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-                return;
-            }
-            if (tryMove(currentX + stepX, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-                return;
-            }
-        }
-
-        // 3. corner escape / wall slide attempts
-        double nudge = Math.max(1.2, moveSpeed);
-
-        // perpendicular-style attempts help stop sticking on corners
-        if (tryMove(currentX + nudge, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX - nudge, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-
-        // 4. small diagonal escape attempts
-        if (tryMove(currentX + nudge, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX - nudge, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX + nudge, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        tryMove(currentX - nudge, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight);
+        // This bypasses maze.canMoveTo entirely.
+        // The enemy SHOULD walk through walls straight at you.
+        setLocation(curX + stepX, curY + stepY);
     }
-
+    
     private boolean tryMove(
         double nextX,
         double nextY,
@@ -166,7 +115,7 @@ public class Enemy extends Entity {
         double hitboxWidth,
         double hitboxHeight
     ) {
-        if (maze.canMoveTo(nextX + hitboxOffsetX, nextY + hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+        if (maze.canMoveTo(nextX + hitboxOffsetX, nextY + hitboxOffsetY, hitboxWidth - 1, hitboxHeight - 1)) {
             setLocation(nextX, nextY);
             return true;
         }
