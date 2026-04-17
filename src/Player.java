@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 import acm.graphics.*;
 
 public class Player extends Entity {
@@ -58,7 +56,6 @@ public class Player extends Entity {
             new GImage("char_walk2R.png")
         };
 
-        // Scale all sprites so animation frames stay the same size
         imgIdle.scale(SPRITE_SCALE, SPRITE_SCALE);
         imgUp.scale(SPRITE_SCALE, SPRITE_SCALE);
 
@@ -90,28 +87,28 @@ public class Player extends Entity {
         boolean moved = false;
 
         if (upPressed) {
-        	newY -= speed;
-        	facing = "up";
-        	charDirection(imgUp);
-        	moved = true;
+            newY -= speed;
+            facing = "up";
+            charDirection(imgUp);
+            moved = true;
         }
         if (downPressed) {
-        	newY += speed;
-        	facing = "down";
-        	updateAnimation(imgDown);
-        	moved = true;
+            newY += speed;
+            facing = "down";
+            updateAnimation(imgDown);
+            moved = true;
         }
         if (leftPressed) {
-        	newX -= speed;
-        	facing = "left";
-        	updateAnimation(imgLeft);
-        	moved = true;
+            newX -= speed;
+            facing = "left";
+            updateAnimation(imgLeft);
+            moved = true;
         }
         if (rightPressed) {
-        	newX += speed;
-        	facing = "right";
-        	updateAnimation(imgRight);
-        	moved = true;
+            newX += speed;
+            facing = "right";
+            updateAnimation(imgRight);
+            moved = true;
         }
 
         if (!moved) {
@@ -162,7 +159,6 @@ public class Player extends Entity {
             return;
         }
 
-        // Slightly bigger hitbox so player can't slip out as easily
         double hitboxWidth = 10;
         double hitboxHeight = 10;
 
@@ -203,35 +199,30 @@ public class Player extends Entity {
         return attackCooldownTimer == 0;
     }
 
-    public boolean isEnemyInRange(ArrayList<Enemy> enemies) {
-        if (enemies == null || weapon == null) return false;
+    public boolean isEnemyInRange(Enemy enemy) {
+        if (enemy == null || weapon == null) return false;
 
-        for (Enemy e : enemies) {
-            double dx = e.getX() - this.getX();
-            double dy = e.getY() - this.getY();
-            double distance = Math.sqrt(dx * dx + dy * dy);
+        double dx = enemy.getX() - this.getX();
+        double dy = enemy.getY() - this.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance <= weapon.getRange()) {
-                return true; // At least one enemy is close enough
-            }
-        }
-        return false;
+        return distance <= weapon.getRange();
     }
 
-    public void attack(ArrayList<Enemy> enemies) {
-        if (weapon == null || enemies == null) return;
+    public void attack(Enemy enemy) {
+        if (weapon == null || enemy == null) return;
 
         if (!canAttack()) {
             System.out.println("Weapon is on cooldown.");
             return;
         }
 
-        if (!isEnemyInRange(enemies)) {
+        if (!isEnemyInRange(enemy)) {
             System.out.println("Enemy is out of range.");
             return;
         }
 
-        weapon.attack(null, enemies);
+        weapon.attack(this, enemy);
         attackCooldownTimer = weapon.getCooldown();
     }
 
@@ -245,7 +236,7 @@ public class Player extends Entity {
     }
     
     public void updateAnimation(GImage[] walk) {
-    	frameTimer++;
+        frameTimer++;
 
         if (frameTimer >= frameSpeed) {
             frameTimer = 0;
@@ -262,9 +253,9 @@ public class Player extends Entity {
     }
     
     private void charDirection(GImage frames) {
-    	if (appearance == frames) return;
+        if (appearance == frames) return;
 
-    	remove(appearance);
+        remove(appearance);
         appearance = frames;
         appearance.setLocation(0, 0);
         add(appearance);

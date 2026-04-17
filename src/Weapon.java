@@ -1,15 +1,11 @@
-import java.util.ArrayList;
-
 public class Weapon {
 
-    // Basic weapon stats used by the player combat system
     private String name;
     private int damage;
     private int cooldown;
     private double range;
 
     public Weapon(String type) {
-        // Balanced values
         switch (type.toLowerCase()) {
 
             case "laser sword":
@@ -56,19 +52,16 @@ public class Weapon {
         }
     }
 
-    public void attack(Player player, ArrayList<Enemy> enemies) {
-        if (enemies == null || player == null) return;
+    public void attack(Player player, Enemy enemy) {
+        if (enemy == null || player == null) return;
 
-        for (Enemy e : enemies) {
-            double dx = e.getX() - player.getX();
-            double dy = e.getY() - player.getY();
-            double distance = Math.sqrt(dx * dx + dy * dy);
+        double dx = enemy.getX() - player.getX();
+        double dy = enemy.getY() - player.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Only damage enemies within the specific weapon's range
-            if (distance <= this.range) {
-                e.takeDamage(damage);
-                System.out.println(name + " hit an enemy for " + damage + " damage");
-            }
+        if (distance <= this.range) {
+            enemy.takeDamage(damage);
+            System.out.println(name + " hit the enemy for " + damage + " damage");
         }
     }
     
