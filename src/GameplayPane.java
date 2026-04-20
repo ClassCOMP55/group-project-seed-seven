@@ -269,6 +269,18 @@ public class GameplayPane extends GraphicsPane {
         }
     }
 
+    private void handlePlayerDeath() {
+        if (stageTransitioning) return;
+
+        stageTransitioning = true;
+
+        if (currentStage == 4) {
+            currentStage = 1;
+        }
+
+        loadStage(currentStage);
+    }
+
     private void removeProjectile(int i) {
         Projectile p = projectiles.get(i);
         mainScreen.remove(p);
@@ -367,6 +379,9 @@ public class GameplayPane extends GraphicsPane {
 
                 if (player != null && player.getHealth() <= 0) {
                     statusLabel.setLabel("Player defeated!");
+                    mainScreen.pause(700);
+                    handlePlayerDeath();
+                    continue;
                 }
 
                 mainScreen.pause(16);
