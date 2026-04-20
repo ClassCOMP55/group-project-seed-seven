@@ -10,15 +10,16 @@ public class Enemy extends Entity {
     private double height = 20;
 
     public Enemy(float x, float y, EnemyType type) {
-    	// Initialize with placeholder health, set 
-    	// specifically in initializeStats
+        // Initialize with placeholder health, set
+        // specifically in initializeStats
         super(x, y, 0);
         this.type = type;
         initializeStats();
         this.setLocation(x, y);
     }
-    
+
     private void initializeStats() {
+<<<<<<< HEAD
     	this.width = 20;
     	this.height = 20;
     	switch (this.type) {
@@ -43,25 +44,45 @@ public class Enemy extends Entity {
     		this.speed = 3.5f;
     		break;
     	}
+=======
+        switch (this.type) {
+            case SPIDER:
+                this.health = 10;
+                this.damage = 5;
+                this.speed = 3.0f;
+                break;
+            case SKELETON:
+                this.health = 50;
+                this.damage = 15;
+                this.speed = 1.8f;
+                break;
+            case ALIEN:
+                this.health = 100;
+                this.damage = 25;
+                this.speed = 2.6f;
+                break;
+            case MUTANT: // BOSS
+                this.health = 500;
+                this.damage = 50;
+                this.speed = 2.0f;
+                break;
+        }
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
     }
-    
+
     // -- GETTERS FOR TESTING PURPOSES --
-    /** @return The current health inherited from Entity */
     public int getHealth() {
         return this.health;
     }
 
-    /** @return The movement speed multiplier */
     public float getSpeed() {
         return this.speed;
     }
 
-    /** @return The attack damage value */
     public int getDamage() {
         return this.damage;
     }
 
-    /** @return The specific EnemyType enum value */
     public EnemyType getType() {
         return this.type;
     }
@@ -71,9 +92,19 @@ public class Enemy extends Entity {
         // Implementation for Entity movement
     }
 
+<<<<<<< HEAD
     public void moveTowardsPlayer(Player player, Maze maze) {
         double dx = player.getX() - getX();
         double dy = player.getY() - getY();
+=======
+    // Joshua's original version kept
+    public void moveTowardsPlayer(Player player) {
+        double playerX = player.getX();
+        double playerY = player.getY();
+
+        double dx = playerX - getX();
+        double dy = playerY - getY();
+>>>>>>> branch 'main' of https://github.com/ClassCOMP55/group-project-seed-seven
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 0) {
@@ -94,7 +125,100 @@ public class Enemy extends Entity {
             }
         }
     }
-    
+
+    // Maze-aware version
+    public void moveTowardsPlayer(Player player, Maze maze) {
+        if (player == null || maze == null) return;
+
+        double currentX = getX();
+        double currentY = getY();
+        double playerX = player.getX();
+        double playerY = player.getY();
+
+        double dx = playerX - currentX;
+        double dy = playerY - currentY;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance <= 0) return;
+
+        // Prevent the enemy from snapping directly onto the player
+        double stopDistance = 14.0;
+        if (distance < stopDistance) return;
+
+        // Slow down a bit when the enemy gets close
+        double moveSpeed = speed;
+        if (distance < 60) {
+            moveSpeed = Math.max(1.0, speed * 0.55);
+        }
+
+        double normX = dx / distance;
+        double normY = dy / distance;
+
+        double stepX = normX * moveSpeed;
+        double stepY = normY * moveSpeed;
+
+        // Smaller collision box so enemy fits inside paths
+        double hitboxWidth = 18;
+        double hitboxHeight = 18;
+        double hitboxOffsetX = 6;
+        double hitboxOffsetY = 6;
+
+        // 1. direct move
+        if (tryMove(currentX + stepX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+
+        boolean xPriority = Math.abs(dx) >= Math.abs(dy);
+
+        // 2. try dominant axis first
+        if (xPriority) {
+            if (tryMove(currentX + stepX, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+            if (tryMove(currentX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+        } else {
+            if (tryMove(currentX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+            if (tryMove(currentX + stepX, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+        }
+
+        // 3. corner escape / wall slide attempts
+        double nudge = Math.max(1.2, moveSpeed);
+
+        // perpendicular-style attempts help stop sticking on corners
+        if (tryMove(currentX + nudge, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        if (tryMove(currentX - nudge, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        if (tryMove(currentX, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        if (tryMove(currentX, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+
+        // 4. small diagonal escape attempts
+        if (tryMove(currentX + nudge, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        if (tryMove(currentX - nudge, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        if (tryMove(currentX + nudge, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        tryMove(currentX - nudge, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight);
+    }
+
+    private boolean tryMove(
+        double nextX,
+        double nextY,
+        Maze maze,
+        double hitboxOffsetX,
+        double hitboxOffsetY,
+        double hitboxWidth,
+        double hitboxHeight
+    ) {
+        if (maze.canMoveTo(nextX + hitboxOffsetX, nextY + hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            setLocation(nextX, nextY);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public double getWidth() { return width; }
     @Override
@@ -102,39 +226,39 @@ public class Enemy extends Entity {
     
     @Override
     public void takeDamage(int amount) {
-    	this.health -= amount;
-    	if (this.health <= 0) {
-    		handleDeath();
-    	}
+        this.health -= amount;
+        if (this.health <= 0) {
+            handleDeath();
+        }
     }
-    
+
     private void handleDeath() {
-    	Orb droppedOrb = null;
-    	double roll = rand.nextDouble(); // Generates 0.0 to 1.0
-    	
-    	switch (this.type) {
-    	case SPIDER:
-    		if (roll < 0.10) droppedOrb = new Orb(); // 10% chance
-    		break;
-    	case SKELETON:
-    		if (roll < 0.40) droppedOrb = new Orb(); // 40% chance
-    		break;
-    	case ALIEN:
-    		droppedOrb = new Orb(); // 100% chance
-    		break;
-    	case MUTANT:
-    		droppedOrb = new Orb();
-    		break;
-    	}
-    	
-    	if (droppedOrb != null) {
-    		System.out.println(type + " dropped an EXP orb!");
-    		// Logic to add droppedOrb to the game goes here
-    	}
-    	
-    	// Remove from parent GCanvas or set inactive
-    	if (this.getParent() != null) {
-    		this.getParent().remove(this);
-    	}
+        Orb droppedOrb = null;
+        double roll = rand.nextDouble(); // Generates 0.0 to 1.0
+
+        switch (this.type) {
+            case SPIDER:
+                if (roll < 0.10) droppedOrb = new Orb(); // 10% chance
+                break;
+            case SKELETON:
+                if (roll < 0.40) droppedOrb = new Orb(); // 40% chance
+                break;
+            case ALIEN:
+                droppedOrb = new Orb(); // 100% chance
+                break;
+            case MUTANT:
+                droppedOrb = new Orb();
+                break;
+        }
+
+        if (droppedOrb != null) {
+            System.out.println(type + " dropped an EXP orb!");
+            // Logic to add droppedOrb to the game goes here
+        }
+
+        // Remove from parent GCanvas or set inactive
+        if (this.getParent() != null) {
+            this.getParent().remove(this);
+        }
     }
 }
