@@ -1,4 +1,3 @@
-import acm.graphics.*;
 import java.util.Random;
 
 public class Enemy extends Entity {
@@ -7,9 +6,10 @@ public class Enemy extends Entity {
     private EnemyType type;
     private Random rand = new Random();
 
+    private int attackCooldownTimer;
+    private double attackRange;
+
     public Enemy(float x, float y, EnemyType type) {
-        // Initialize with placeholder health, set
-        // specifically in initializeStats
         super(x, y, 0);
         this.type = type;
         initializeStats();
@@ -19,29 +19,39 @@ public class Enemy extends Entity {
     private void initializeStats() {
         switch (this.type) {
             case SPIDER:
-                this.health = 10;
-                this.damage = 5;
-                this.speed = 3.0f;
+                this.health = 75;
+                this.damage = 10;
+                this.speed = 1.55f;
+                this.attackRange = 24;
+                this.attackCooldownTimer = 0;
                 break;
+
             case SKELETON:
-                this.health = 50;
-                this.damage = 15;
-                this.speed = 1.8f;
+                this.health = 95;
+                this.damage = 14;
+                this.speed = 1.35f;
+                this.attackRange = 26;
+                this.attackCooldownTimer = 0;
                 break;
+
             case ALIEN:
-                this.health = 100;
-                this.damage = 25;
-                this.speed = 2.6f;
+                this.health = 135;
+                this.damage = 20;
+                this.speed = 1.45f;
+                this.attackRange = 28;
+                this.attackCooldownTimer = 0;
                 break;
-            case MUTANT: // BOSS
-                this.health = 500;
-                this.damage = 50;
-                this.speed = 2.0f;
+
+            case MUTANT:
+                this.health = 205;
+                this.damage = 32;
+                this.speed = 1.15f;
+                this.attackRange = 30;
+                this.attackCooldownTimer = 0;
                 break;
         }
     }
 
-    // -- GETTERS FOR TESTING PURPOSES --
     public int getHealth() {
         return this.health;
     }
@@ -58,18 +68,60 @@ public class Enemy extends Entity {
         return this.type;
     }
 
-    @Override
-    public void move() {
-        // Implementation for Entity movement
+    public double getAttackRange() {
+        return this.attackRange;
     }
 
-    // Joshua's original version kept
-    public void moveTowardsPlayer(Player player) {
-        double playerX = player.getX();
-        double playerY = player.getY();
+    @Override
+    public void move() {
+        // not used directly
+    }
 
-        double dx = playerX - getX();
-        double dy = playerY - getY();
+    public void updateCombat() {
+        if (attackCooldownTimer > 0) {
+            attackCooldownTimer--;
+        }
+    }
+
+    public boolean canAttack() {
+        return attackCooldownTimer == 0;
+    }
+
+    public boolean isPlayerInRange(Player player) {
+        if (player == null) return false;
+
+        double enemyCenterX = getX() + 15;
+        double enemyCenterY = getY() + 15;
+        double playerCenterX = player.getX() + player.getSpriteWidth() / 2.0;
+        double playerCenterY = player.getY() + player.getSpriteHeight() / 2.0;
+
+        double dx = playerCenterX - enemyCenterX;
+        double dy = playerCenterY - enemyCenterY;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        return distance <= attackRange;
+    }
+
+    public void attack(Player player) {
+        if (player == null) return;
+        if (!canAttack()) return;
+        if (!isPlayerInRange(player)) return;
+
+        player.takeDamage(damage);
+        attackCooldownTimer = 30;
+        System.out.println(type + " hit player for " + damage + " damage");
+    }
+
+    public void moveTowardsPlayer(Player player) {
+        if (player == null) return;
+
+        double enemyCenterX = getX() + 15;
+        double enemyCenterY = getY() + 15;
+        double playerCenterX = player.getX() + player.getSpriteWidth() / 2.0;
+        double playerCenterY = player.getY() + player.getSpriteHeight() / 2.0;
+
+        double dx = playerCenterX - enemyCenterX;
+        double dy = playerCenterY - enemyCenterY;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 0) {
@@ -80,29 +132,32 @@ public class Enemy extends Entity {
         }
     }
 
-    // Maze-aware version
     public void moveTowardsPlayer(Player player, Maze maze) {
         if (player == null || maze == null) return;
 
         double currentX = getX();
         double currentY = getY();
-        double playerX = player.getX();
-        double playerY = player.getY();
 
-        double dx = playerX - currentX;
-        double dy = playerY - currentY;
+        double enemyCenterX = currentX + 15;
+        double enemyCenterY = currentY + 15;
+        double playerCenterX = player.getX() + player.getSpriteWidth() / 2.0;
+        double playerCenterY = player.getY() + player.getSpriteHeight() / 2.0;
+
+        double dx = playerCenterX - enemyCenterX;
+        double dy = playerCenterY - enemyCenterY;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance <= 0) return;
 
-        // Prevent the enemy from snapping directly onto the player
-        double stopDistance = 14.0;
+        double stopDistance = 20.0;
         if (distance < stopDistance) return;
 
-        // Slow down a bit when the enemy gets close
         double moveSpeed = speed;
-        if (distance < 60) {
-            moveSpeed = Math.max(1.0, speed * 0.55);
+        if (distance < 90) {
+            moveSpeed = Math.max(0.75, speed * 0.7);
+        }
+        if (distance < 45) {
+            moveSpeed = Math.max(0.55, speed * 0.45);
         }
 
         double normX = dx / distance;
@@ -111,50 +166,96 @@ public class Enemy extends Entity {
         double stepX = normX * moveSpeed;
         double stepY = normY * moveSpeed;
 
-        // Smaller collision box so enemy fits inside paths
-        double hitboxWidth = 18;
-        double hitboxHeight = 18;
-        double hitboxOffsetX = 6;
-        double hitboxOffsetY = 6;
+        // smaller centered hitbox so enemy does not snag on walls so much
+        double hitboxWidth = 12;
+        double hitboxHeight = 12;
+        double hitboxOffsetX = 9;
+        double hitboxOffsetY = 9;
 
-        // 1. direct move
-        if (tryMove(currentX + stepX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+        if (tryMove(currentX + stepX, currentY + stepY, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
             return;
         }
 
         boolean xPriority = Math.abs(dx) >= Math.abs(dy);
 
-        // 2. try dominant axis first
         if (xPriority) {
-            if (tryMove(currentX + stepX, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            if (tryMove(currentX + stepX, currentY, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
                 return;
             }
-            if (tryMove(currentX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            if (tryMove(currentX, currentY + stepY, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
                 return;
             }
         } else {
-            if (tryMove(currentX, currentY + stepY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            if (tryMove(currentX, currentY + stepY, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
                 return;
             }
-            if (tryMove(currentX + stepX, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            if (tryMove(currentX + stepX, currentY, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
                 return;
             }
         }
 
-        // 3. corner escape / wall slide attempts
-        double nudge = Math.max(1.2, moveSpeed);
+        double sideStep = Math.max(1.4, moveSpeed * 1.8);
 
-        // perpendicular-style attempts help stop sticking on corners
-        if (tryMove(currentX + nudge, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX - nudge, currentY, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
+        if (xPriority) {
+            if (tryMove(currentX, currentY + sideStep, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+            if (tryMove(currentX, currentY - sideStep, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+        } else {
+            if (tryMove(currentX + sideStep, currentY, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+            if (tryMove(currentX - sideStep, currentY, maze,
+                    hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                return;
+            }
+        }
 
-        // 4. small diagonal escape attempts
-        if (tryMove(currentX + nudge, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX - nudge, currentY + nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        if (tryMove(currentX + nudge, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) return;
-        tryMove(currentX - nudge, currentY - nudge, maze, hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight);
+        if (tryMove(currentX + sideStep, currentY + sideStep, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+        if (tryMove(currentX - sideStep, currentY + sideStep, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+        if (tryMove(currentX + sideStep, currentY - sideStep, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+        if (tryMove(currentX - sideStep, currentY - sideStep, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+
+        double nudge = 1.0;
+
+        if (tryMove(currentX + nudge, currentY, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+        if (tryMove(currentX - nudge, currentY, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+        if (tryMove(currentX, currentY + nudge, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
+        if (tryMove(currentX, currentY - nudge, maze,
+                hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            return;
+        }
     }
 
     private boolean tryMove(
@@ -166,7 +267,11 @@ public class Enemy extends Entity {
         double hitboxWidth,
         double hitboxHeight
     ) {
-        if (maze.canMoveTo(nextX + hitboxOffsetX, nextY + hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+        if (maze.canMoveTo(
+                nextX + hitboxOffsetX,
+                nextY + hitboxOffsetY,
+                hitboxWidth,
+                hitboxHeight)) {
             setLocation(nextX, nextY);
             return true;
         }
@@ -183,17 +288,17 @@ public class Enemy extends Entity {
 
     private void handleDeath() {
         Orb droppedOrb = null;
-        double roll = rand.nextDouble(); // Generates 0.0 to 1.0
+        double roll = rand.nextDouble();
 
         switch (this.type) {
             case SPIDER:
-                if (roll < 0.10) droppedOrb = new Orb(); // 10% chance
+                if (roll < 0.20) droppedOrb = new Orb();
                 break;
             case SKELETON:
-                if (roll < 0.40) droppedOrb = new Orb(); // 40% chance
+                if (roll < 0.40) droppedOrb = new Orb();
                 break;
             case ALIEN:
-                droppedOrb = new Orb(); // 100% chance
+                if (roll < 0.70) droppedOrb = new Orb();
                 break;
             case MUTANT:
                 droppedOrb = new Orb();
@@ -202,10 +307,8 @@ public class Enemy extends Entity {
 
         if (droppedOrb != null) {
             System.out.println(type + " dropped an EXP orb!");
-            // Logic to add droppedOrb to the game goes here
         }
 
-        // Remove from parent GCanvas or set inactive
         if (this.getParent() != null) {
             this.getParent().remove(this);
         }

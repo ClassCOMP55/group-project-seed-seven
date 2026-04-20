@@ -7,45 +7,44 @@ public class Weapon {
 
     public Weapon(String type) {
         switch (type.toLowerCase()) {
-
             case "laser sword":
                 name = "Laser Sword";
-                damage = 22;
+                damage = 12;
                 cooldown = 1;
                 range = 50;
                 break;
 
             case "laser gun":
                 name = "Laser Gun";
-                damage = 16;
+                damage = 7;
                 cooldown = 2;
                 range = 180;
                 break;
 
             case "iron sword":
                 name = "Iron Sword";
-                damage = 14;
+                damage = 9;
                 cooldown = 1;
                 range = 45;
                 break;
 
             case "bow and arrow":
                 name = "Bow and Arrow";
-                damage = 12;
+                damage = 6;
                 cooldown = 2;
                 range = 160;
                 break;
 
             case "axe":
                 name = "Axe";
-                damage = 28;
+                damage = 15;
                 cooldown = 3;
                 range = 40;
                 break;
 
             default:
                 name = "Iron Sword";
-                damage = 14;
+                damage = 9;
                 cooldown = 1;
                 range = 45;
                 break;

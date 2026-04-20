@@ -87,28 +87,28 @@ public class Player extends Entity {
         boolean moved = false;
 
         if (upPressed) {
-            newY -= speed;
-            facing = "up";
-            charDirection(imgUp);
-            moved = true;
+        	newY -= speed;
+        	facing = "up";
+        	charDirection(imgUp);
+        	moved = true;
         }
         if (downPressed) {
-            newY += speed;
-            facing = "down";
-            updateAnimation(imgDown);
-            moved = true;
+        	newY += speed;
+        	facing = "down";
+        	updateAnimation(imgDown);
+        	moved = true;
         }
         if (leftPressed) {
-            newX -= speed;
-            facing = "left";
-            updateAnimation(imgLeft);
-            moved = true;
+        	newX -= speed;
+        	facing = "left";
+        	updateAnimation(imgLeft);
+        	moved = true;
         }
         if (rightPressed) {
-            newX += speed;
-            facing = "right";
-            updateAnimation(imgRight);
-            moved = true;
+        	newX += speed;
+        	facing = "right";
+        	updateAnimation(imgRight);
+        	moved = true;
         }
 
         if (!moved) {
@@ -199,6 +199,12 @@ public class Player extends Entity {
         return attackCooldownTimer == 0;
     }
 
+    public void startAttackCooldown() {
+        if (weapon != null) {
+            attackCooldownTimer = weapon.getCooldown();
+        }
+    }
+
     public boolean isEnemyInRange(Enemy enemy) {
         if (enemy == null || weapon == null) return false;
 
@@ -213,12 +219,10 @@ public class Player extends Entity {
         if (weapon == null || enemy == null) return;
 
         if (!canAttack()) {
-            System.out.println("Weapon is on cooldown.");
             return;
         }
 
         if (!isEnemyInRange(enemy)) {
-            System.out.println("Enemy is out of range.");
             return;
         }
 
@@ -236,7 +240,7 @@ public class Player extends Entity {
     }
     
     public void updateAnimation(GImage[] walk) {
-        frameTimer++;
+    	frameTimer++;
 
         if (frameTimer >= frameSpeed) {
             frameTimer = 0;
@@ -253,9 +257,9 @@ public class Player extends Entity {
     }
     
     private void charDirection(GImage frames) {
-        if (appearance == frames) return;
+    	if (appearance == frames) return;
 
-        remove(appearance);
+    	remove(appearance);
         appearance = frames;
         appearance.setLocation(0, 0);
         add(appearance);
