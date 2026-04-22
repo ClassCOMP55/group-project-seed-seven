@@ -19,7 +19,7 @@ public class MainApplication extends GraphicsProgram{
 
 
 	public MainApplication() {
-		super();
+		super(); 
 	}
 	
 	protected void setupInteractions() {
@@ -29,7 +29,7 @@ public class MainApplication extends GraphicsProgram{
 	}
 	
 	public void init() {
-		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+		setSize (WINDOW_WIDTH, WINDOW_HEIGHT);
 	}
 	
 	public void run() {

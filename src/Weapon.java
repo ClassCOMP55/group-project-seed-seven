@@ -9,7 +9,6 @@ public class Weapon {
     public Weapon(String type) {
         // Assign weapon stats based on the selected weapon type
         switch (type.toLowerCase()) {
-
             case "laser sword":
                 name = "Laser Sword";
                 damage = 25;

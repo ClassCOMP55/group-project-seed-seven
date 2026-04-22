@@ -53,9 +53,15 @@ public class Player extends Entity {
             new GImage("char_walk1R.png"),
             new GImage("char_walk2R.png")
         };
+        
+        imgIdle.scale(0.35, 0.35);
+        imgUp.scale(0.35, 0.35);
+
+        for (GImage img : imgDown) img.scale(0.35, 0.35);
+        for (GImage img : imgLeft) img.scale(0.35, 0.35);
+        for (GImage img : imgRight) img.scale(0.35, 0.35);
 
         appearance = imgIdle;
-        appearance.scale(0.35, 0.35);
 
         add(appearance);
         
@@ -100,22 +106,32 @@ public class Player extends Entity {
         double currentY = getY();
         double newX = currentX;
         double newY = currentY;
+        
+        boolean isMoving = false;
 
         if (upPressed) {
             newY -= speed;
             facing = "up";
+            charDirection(imgUp);
+            isMoving = true;
         }
         if (downPressed) {
             newY += speed;
             facing = "down";
+            updateAnimation(imgDown);
+            isMoving = true;
         }
         if (leftPressed) {
             newX -= speed;
             facing = "left";
+            updateAnimation(imgLeft);
+            isMoving = true;
         }
         if (rightPressed) {
             newX += speed;
             facing = "right";
+            updateAnimation(imgRight);
+            isMoving = true;
         }
 
         double hitboxWidth = 6;
@@ -158,6 +174,12 @@ public class Player extends Entity {
         return attackCooldownTimer == 0;
     }
 
+    public void startAttackCooldown() {
+        if (weapon != null) {
+            attackCooldownTimer = weapon.getCooldown();
+        }
+    }
+
     public boolean isEnemyInRange(Enemy enemy) {
         if (enemy == null || weapon == null) return false;
 
@@ -172,12 +194,10 @@ public class Player extends Entity {
         if (weapon == null || enemy == null) return;
 
         if (!canAttack()) {
-            System.out.println("Weapon is on cooldown.");
             return;
         }
 
         if (!isEnemyInRange(enemy)) {
-            System.out.println("Enemy is out of range.");
             return;
         }
 
