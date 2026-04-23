@@ -71,6 +71,8 @@ public class Enemy extends Entity {
     }
     
     private void loadAnimationFrames() {
+    	
+    	double scaleFactor = 0.35;
 
         switch (type) {
 
@@ -87,6 +89,7 @@ public class Enemy extends Entity {
                 walkRight = new GImage[] {
                     new GImage("spider_right.png")
                 };
+                scaleFactor = 0.35;
                 break;
 
             case SKELETON:
@@ -106,6 +109,7 @@ public class Enemy extends Entity {
                     new GImage("skl_right.png"),
                     new GImage("skl_right1.png")
                 };
+                scaleFactor = 0.35;
                 break;
 
             case ALIEN:
@@ -124,6 +128,7 @@ public class Enemy extends Entity {
                     new GImage("alien_right.png"),
                     new GImage("alien_right1.png")
                 };
+                scaleFactor = 0.18;
                 break;
 
             case MUTANT:
@@ -143,13 +148,14 @@ public class Enemy extends Entity {
                     new GImage("mut_right.png"),
                     new GImage("mut_right1.png")
                 };
+                scaleFactor = 0.35;
                 break;
         }
 
-        for (GImage img : walkUp) img.scale(0.35, 0.35);
-        for (GImage img : walkDown) img.scale(0.35, 0.35);
-        for (GImage img : walkLeft) img.scale(0.35, 0.35);
-        for (GImage img : walkRight) img.scale(0.35, 0.35);
+        for (GImage img : walkUp) img.scale(scaleFactor);
+        for (GImage img : walkDown) img.scale(scaleFactor);
+        for (GImage img : walkLeft) img.scale(scaleFactor);
+        for (GImage img : walkRight) img.scale(scaleFactor);
 
         appearance = walkDown[0];
         add(appearance);

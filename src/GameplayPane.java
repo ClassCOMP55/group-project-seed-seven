@@ -9,7 +9,7 @@ public class GameplayPane extends GraphicsPane {
 
     private Player player;
     private Enemy enemy;
-    private GOval attackEffect;
+    private GImage attackEffect;
 
     private GLabel controlsLabel;
     private GLabel weaponLabel;
@@ -114,7 +114,7 @@ public class GameplayPane extends GraphicsPane {
         }
 
         double mazeX = (mainScreen.getWidth() - maze.getMazeWidth()) / 2.0;
-        double mazeY = 200;
+        double mazeY = (mainScreen.getGCanvas().getHeight() - maze.getMazeHeight()) / 2.0;
 
         maze.setRenderPosition(mazeX, mazeY);
         maze.renderTo(mainScreen, contents);
@@ -370,6 +370,10 @@ public class GameplayPane extends GraphicsPane {
 
         double spriteWidth = player.getSpriteWidth();
         double spriteHeight = player.getSpriteHeight();
+        
+        attackEffect = new GImage("attackeffect_right.png");
+        attackEffect.scale(0.1, 0.1);
+        attackEffect.setLocation(effectX, effectY);
 
         switch (player.getFacing()) {
             case "up":
@@ -390,17 +394,12 @@ public class GameplayPane extends GraphicsPane {
                 break;
         }
 
-        attackEffect = new GOval(effectX, effectY, 20, 20);
-        attackEffect.setFilled(true);
-        attackEffect.setFillColor(Color.YELLOW);
-        attackEffect.setColor(Color.ORANGE);
-
         contents.add(attackEffect);
         mainScreen.add(attackEffect);
         attackEffect.sendToFront();
 
         new Thread(() -> {
-            GOval currentEffect = attackEffect;
+            GImage currentEffect = attackEffect;
             mainScreen.pause(180);
             if (currentEffect != null) {
                 mainScreen.remove(currentEffect);
