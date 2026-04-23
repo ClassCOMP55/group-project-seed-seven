@@ -28,9 +28,7 @@ public class Enemy extends Entity {
         super(x, y, 0);
         this.type = type;
         initializeStats();
-        
         loadAnimationFrames();
-
         this.setLocation(x, y);
     }
 
@@ -71,11 +69,9 @@ public class Enemy extends Entity {
     }
     
     private void loadAnimationFrames() {
-    	
-    	double scaleFactor = 0.35;
+        double scaleFactor = 0.35;
 
         switch (type) {
-
             case SPIDER:
                 walkUp = new GImage[] {
                     new GImage("spider_right.png")
@@ -158,6 +154,7 @@ public class Enemy extends Entity {
         for (GImage img : walkRight) img.scale(scaleFactor);
 
         appearance = walkDown[0];
+        appearance.setLocation(0, 0);
         add(appearance);
     }
 
@@ -199,8 +196,8 @@ public class Enemy extends Entity {
     public boolean isPlayerInRange(Player player) {
         if (player == null) return false;
 
-        double enemyCenterX = getX() + 15;
-        double enemyCenterY = getY() + 15;
+        double enemyCenterX = getX() + getCenterOffsetX();
+        double enemyCenterY = getY() + getCenterOffsetY();
         double playerCenterX = player.getX() + player.getSpriteWidth() / 2.0;
         double playerCenterY = player.getY() + player.getSpriteHeight() / 2.0;
 
@@ -228,7 +225,6 @@ public class Enemy extends Entity {
         }
     }
 
-
     public void attack(Player player) {
         if (player == null) return;
         if (!canAttack()) return;
@@ -242,8 +238,8 @@ public class Enemy extends Entity {
     public void moveTowardsPlayer(Player player) {
         if (player == null) return;
 
-        double enemyCenterX = getX() + 15;
-        double enemyCenterY = getY() + 15;
+        double enemyCenterX = getX() + getCenterOffsetX();
+        double enemyCenterY = getY() + getCenterOffsetY();
         double playerCenterX = player.getX() + player.getSpriteWidth() / 2.0;
         double playerCenterY = player.getY() + player.getSpriteHeight() / 2.0;
 
@@ -252,45 +248,47 @@ public class Enemy extends Entity {
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 0) {
+            updateFacing(dx, dy);
+
             double stepX = (dx / distance) * speed;
             double stepY = (dy / distance) * speed;
 
             setLocation(getX() + stepX, getY() + stepY);
+            animateFacing();
         }
     }
 
     public void moveTowardsPlayer(Player player, Maze maze) {
         if (player == null || maze == null) return;
 
+        // if enemy spawned in a bad spot, snap it into the nearest valid one first
+        ensureInsideMaze(maze);
+
         double currentX = getX();
         double currentY = getY();
 
-        double enemyCenterX = currentX + 15;
-        double enemyCenterY = currentY + 15;
+        double enemyCenterX = currentX + getCenterOffsetX();
+        double enemyCenterY = currentY + getCenterOffsetY();
         double playerCenterX = player.getX() + player.getSpriteWidth() / 2.0;
         double playerCenterY = player.getY() + player.getSpriteHeight() / 2.0;
 
         double dx = playerCenterX - enemyCenterX;
         double dy = playerCenterY - enemyCenterY;
         double distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (Math.abs(dx) > Math.abs(dy)) {
-            facing = (dx > 0) ? "right" : "left";
-        } else {
-            facing = (dy > 0) ? "down" : "up";
-        }
 
         if (distance <= 0) return;
 
-        double stopDistance = 20.0;
+        updateFacing(dx, dy);
+
+        double stopDistance = 18.0;
         if (distance < stopDistance) return;
 
         double moveSpeed = speed;
         if (distance < 90) {
-            moveSpeed = Math.max(0.75, speed * 0.7);
+            moveSpeed = Math.max(0.85, speed * 0.78);
         }
         if (distance < 45) {
-            moveSpeed = Math.max(0.55, speed * 0.45);
+            moveSpeed = Math.max(0.65, speed * 0.58);
         }
 
         double normX = dx / distance;
@@ -299,16 +297,14 @@ public class Enemy extends Entity {
         double stepX = normX * moveSpeed;
         double stepY = normY * moveSpeed;
 
-        // smaller centered hitbox so enemy does not snag on walls so much
-        double hitboxWidth = 12;
-        double hitboxHeight = 12;
-        double hitboxOffsetX = 9;
-        double hitboxOffsetY = 9;
+        double hitboxWidth = getMoveHitboxWidth();
+        double hitboxHeight = getMoveHitboxHeight();
+        double hitboxOffsetX = getMoveHitboxOffsetX();
+        double hitboxOffsetY = getMoveHitboxOffsetY();
 
         if (tryMove(currentX + stepX, currentY + stepY, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-        	animateFacing();
-
+            animateFacing();
             return;
         }
 
@@ -317,84 +313,196 @@ public class Enemy extends Entity {
         if (xPriority) {
             if (tryMove(currentX + stepX, currentY, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-            	animateFacing();
+                animateFacing();
                 return;
             }
             if (tryMove(currentX, currentY + stepY, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-            	animateFacing();
+                animateFacing();
                 return;
             }
         } else {
             if (tryMove(currentX, currentY + stepY, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-            	animateFacing();
+                animateFacing();
                 return;
             }
             if (tryMove(currentX + stepX, currentY, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
-            	animateFacing();
+                animateFacing();
                 return;
             }
         }
 
-        double sideStep = Math.max(1.4, moveSpeed * 1.8);
+        double sideStep = Math.max(2.2, moveSpeed * 2.8);
 
         if (xPriority) {
             if (tryMove(currentX, currentY + sideStep, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                animateFacing();
                 return;
             }
             if (tryMove(currentX, currentY - sideStep, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                animateFacing();
                 return;
             }
         } else {
             if (tryMove(currentX + sideStep, currentY, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                animateFacing();
                 return;
             }
             if (tryMove(currentX - sideStep, currentY, maze,
                     hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+                animateFacing();
                 return;
             }
         }
 
-        if (tryMove(currentX + sideStep, currentY + sideStep, maze,
+        double diagStep = Math.max(3.0, moveSpeed * 2.4);
+
+        if (tryMove(currentX + diagStep, currentY + diagStep, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
-        if (tryMove(currentX - sideStep, currentY + sideStep, maze,
+        if (tryMove(currentX - diagStep, currentY + diagStep, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
-        if (tryMove(currentX + sideStep, currentY - sideStep, maze,
+        if (tryMove(currentX + diagStep, currentY - diagStep, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
-        if (tryMove(currentX - sideStep, currentY - sideStep, maze,
+        if (tryMove(currentX - diagStep, currentY - diagStep, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
 
-        double nudge = 1.0;
+        double wideStep = Math.max(4.0, moveSpeed * 3.5);
 
-        if (tryMove(currentX + nudge, currentY, maze,
+        if (tryMove(currentX + wideStep, currentY, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
-        if (tryMove(currentX - nudge, currentY, maze,
+        if (tryMove(currentX - wideStep, currentY, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
-        if (tryMove(currentX, currentY + nudge, maze,
+        if (tryMove(currentX, currentY + wideStep, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
-        if (tryMove(currentX, currentY - nudge, maze,
+        if (tryMove(currentX, currentY - wideStep, maze,
                 hitboxOffsetX, hitboxOffsetY, hitboxWidth, hitboxHeight)) {
+            animateFacing();
             return;
         }
+    }
+
+    private void ensureInsideMaze(Maze maze) {
+        if (isCurrentPositionValid(maze)) {
+            return;
+        }
+
+        double startX = getX();
+        double startY = getY();
+
+        for (int radius = 2; radius <= 60; radius += 2) {
+            for (int x = -radius; x <= radius; x += 2) {
+                for (int y = -radius; y <= radius; y += 2) {
+                    double candidateX = startX + x;
+                    double candidateY = startY + y;
+
+                    if (isValidPosition(candidateX, candidateY, maze)) {
+                        setLocation(candidateX, candidateY);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isCurrentPositionValid(Maze maze) {
+        return isValidPosition(getX(), getY(), maze);
+    }
+
+    private boolean isValidPosition(double x, double y, Maze maze) {
+        return maze.canMoveTo(
+            x + getMoveHitboxOffsetX(),
+            y + getMoveHitboxOffsetY(),
+            getMoveHitboxWidth(),
+            getMoveHitboxHeight()
+        );
+    }
+
+    private void updateFacing(double dx, double dy) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+            facing = (dx > 0) ? "right" : "left";
+        } else {
+            facing = (dy > 0) ? "down" : "up";
+        }
+    }
+
+    private double getCenterOffsetX() {
+        if (appearance != null) {
+            return appearance.getWidth() / 2.0;
+        }
+        return 12;
+    }
+
+    private double getCenterOffsetY() {
+        if (appearance != null) {
+            return appearance.getHeight() / 2.0;
+        }
+        return 12;
+    }
+
+    private double getMoveHitboxWidth() {
+        switch (type) {
+            case SPIDER:
+                return 10;
+            case SKELETON:
+                return 12;
+            case ALIEN:
+                return 5;
+            case MUTANT:
+                return 16;
+            default:
+                return 12;
+        }
+    }
+
+    private double getMoveHitboxHeight() {
+        switch (type) {
+            case SPIDER:
+                return 10;
+            case SKELETON:
+                return 12;
+            case ALIEN:
+                return 5;
+            case MUTANT:
+                return 16;
+            default:
+                return 12;
+        }
+    }
+
+    private double getMoveHitboxOffsetX() {
+        if (appearance == null) return 8;
+        return (appearance.getWidth() - getMoveHitboxWidth()) / 2.0;
+    }
+
+    private double getMoveHitboxOffsetY() {
+        if (appearance == null) return 8;
+        return (appearance.getHeight() - getMoveHitboxHeight()) / 2.0;
     }
     
     private void updateAnimation(GImage[] frames) {
@@ -403,11 +511,10 @@ public class Enemy extends Entity {
         if (frameTimer >= frameSpeed) {
             frameTimer = 0;
             frameIndex = (frameIndex + 1) % frames.length;
-
             appearance.setImage(frames[frameIndex].getImage());
+            appearance.setLocation(0, 0);
         }
     }
-
 
     private boolean tryMove(
         double nextX,

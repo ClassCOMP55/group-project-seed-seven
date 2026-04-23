@@ -13,6 +13,7 @@ public class GameplayPane extends GraphicsPane {
 
     private GLabel controlsLabel;
     private GLabel weaponLabel;
+    private GLabel switchWeaponsLabel;
     private GLabel statusLabel;
     private GLabel playerHealthLabel;
     private GLabel enemyHealthLabel;
@@ -31,17 +32,24 @@ public class GameplayPane extends GraphicsPane {
     private boolean campaignComplete = false;
     
     private String imageFile;
+    private boolean attackPressed = false;
 
     public GameplayPane(MainApplication mainScreen) {
         this.mainScreen = mainScreen;
     }
 
+    public void setStage(int stage) {
+        if (stage < 1) stage = 1;
+        if (stage > 4) stage = 4;
+        currentStage = stage;
+    }
+
     @Override
     public void showContent() {
-        currentStage = 1;
         gateOpen = false;
         stageTransitioning = false;
         campaignComplete = false;
+        attackPressed = false;
 
         loadStage(currentStage);
         startGameLoop();
@@ -51,6 +59,7 @@ public class GameplayPane extends GraphicsPane {
     public void hideContent() {
         gameLoopStarted = false;
         loopVersion++;
+        attackPressed = false;
 
         for (GObject item : contents) {
             mainScreen.remove(item);
@@ -75,6 +84,7 @@ public class GameplayPane extends GraphicsPane {
         enemy = null;
         maze = null;
         player = null;
+        attackPressed = false;
     }
 
     private void loadStage(int stage) {
@@ -121,35 +131,47 @@ public class GameplayPane extends GraphicsPane {
     }
 
     private void addLabels() {
-        controlsLabel = new GLabel(
-            "WASD = move | SPACE = attack | Defeat enemy to open gate",
-            20, 35
-        );
+        double leftX = 18;
+        int y = 28;
+        int gap = 20;
+
+        controlsLabel = new GLabel("WASD move | SPACE attack", leftX, y);
         controlsLabel.setColor(Color.RED);
-        controlsLabel.setFont("DialogInput-BOLD-16");
+        controlsLabel.setFont("DialogInput-BOLD-13");
+        y += gap;
 
-        weaponLabel = new GLabel("Current Weapon: Iron Sword", 20, 60);
-        weaponLabel.setColor(Color.RED);
-        weaponLabel.setFont("DialogInput-BOLD-16");
+        weaponLabel = new GLabel("Equipped: Iron Sword", leftX, y);
+        weaponLabel.setColor(Color.WHITE);
+        weaponLabel.setFont("DialogInput-BOLD-13");
+        y += gap;
 
-        statusLabel = new GLabel(getStageMessage(), 20, 85);
+        switchWeaponsLabel = new GLabel("Switch: 1 Iron", leftX, y);
+        switchWeaponsLabel.setColor(Color.CYAN);
+        switchWeaponsLabel.setFont("DialogInput-BOLD-13");
+        y += gap;
+
+        statusLabel = new GLabel(getStageMessage(), leftX, y);
         statusLabel.setColor(Color.RED);
-        statusLabel.setFont("DialogInput-PLAIN-16");
+        statusLabel.setFont("DialogInput-PLAIN-13");
+        y += gap;
 
-        playerHealthLabel = new GLabel("Player HP: 100", 20, 110);
+        playerHealthLabel = new GLabel("Player HP: 100", leftX, y);
         playerHealthLabel.setColor(Color.WHITE);
-        playerHealthLabel.setFont("DialogInput-BOLD-16");
+        playerHealthLabel.setFont("DialogInput-BOLD-13");
+        y += gap;
 
-        enemyHealthLabel = new GLabel("Enemy HP: 0", 20, 135);
+        enemyHealthLabel = new GLabel("Enemy HP: 0", leftX, y);
         enemyHealthLabel.setColor(Color.WHITE);
-        enemyHealthLabel.setFont("DialogInput-BOLD-16");
+        enemyHealthLabel.setFont("DialogInput-BOLD-13");
+        y += gap;
 
-        stageLabel = new GLabel(getStageTitle(), 20, 160);
+        stageLabel = new GLabel(getStageTitle(), leftX, y);
         stageLabel.setColor(Color.WHITE);
-        stageLabel.setFont("DialogInput-BOLD-16");
+        stageLabel.setFont("DialogInput-BOLD-13");
 
         contents.add(controlsLabel);
         contents.add(weaponLabel);
+        contents.add(switchWeaponsLabel);
         contents.add(statusLabel);
         contents.add(playerHealthLabel);
         contents.add(enemyHealthLabel);
@@ -157,6 +179,7 @@ public class GameplayPane extends GraphicsPane {
 
         mainScreen.add(controlsLabel);
         mainScreen.add(weaponLabel);
+        mainScreen.add(switchWeaponsLabel);
         mainScreen.add(statusLabel);
         mainScreen.add(playerHealthLabel);
         mainScreen.add(enemyHealthLabel);
@@ -175,6 +198,19 @@ public class GameplayPane extends GraphicsPane {
         if (currentStage == 2) return "Defeat the skeleton to open the gate";
         if (currentStage == 3) return "Defeat the alien to open the gate";
         return "Defeat the mutant boss";
+    }
+
+    private String getSwitchWeaponsText() {
+        if (currentStage == 1) {
+            return "Switch: 1 Iron";
+        }
+        if (currentStage == 2) {
+            return "Switch: 1 Iron | 2 Laser | 4 Bow";
+        }
+        if (currentStage == 3) {
+            return "Switch: 1 Iron | 2 Laser | 4 Bow | 5 Axe";
+        }
+        return "Switch: 1 Iron | 2 Laser | 3 Gun | 4 Bow | 5 Axe";
     }
 
     private void addPlayer() {
@@ -210,8 +246,11 @@ public class GameplayPane extends GraphicsPane {
 
     private void updateLabels() {
         if (player != null) {
+            weaponLabel.setLabel("Equipped: " + player.getWeapon().getName());
             playerHealthLabel.setLabel("Player HP: " + player.getHealth());
         }
+
+        switchWeaponsLabel.setLabel(getSwitchWeaponsText());
 
         if (enemy != null && enemy.getParent() != null) {
             enemyHealthLabel.setLabel(enemy.getType().toString() + " HP: " + enemy.getHealth());
@@ -220,6 +259,43 @@ public class GameplayPane extends GraphicsPane {
         }
 
         stageLabel.setLabel(getStageTitle());
+    }
+
+    private boolean isWeaponUnlocked(String weaponName) {
+        if (weaponName.equals("iron sword")) {
+            return true;
+        }
+
+        if (currentStage >= 2) {
+            if (weaponName.equals("laser sword") || weaponName.equals("bow and arrow")) {
+                return true;
+            }
+        }
+
+        if (currentStage >= 3) {
+            if (weaponName.equals("axe")) {
+                return true;
+            }
+        }
+
+        if (currentStage >= 4) {
+            if (weaponName.equals("laser gun")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void equipWeaponIfUnlocked(String weaponType, String displayName) {
+        if (!isWeaponUnlocked(weaponType)) {
+            statusLabel.setLabel(displayName + " is locked for this stage");
+            return;
+        }
+
+        player.setWeapon(new Weapon(weaponType));
+        updateWeaponLabel();
+        statusLabel.setLabel("Switched to " + displayName);
     }
 
     private void handleStageCleared() {
@@ -231,6 +307,12 @@ public class GameplayPane extends GraphicsPane {
         if (currentStage == 4) {
             statusLabel.setLabel("Boss defeated! Walk to the exit to finish");
             campaignComplete = true;
+        } else if (currentStage == 1) {
+            statusLabel.setLabel("Gate opened! Stage 2 unlocks Laser Sword + Bow");
+        } else if (currentStage == 2) {
+            statusLabel.setLabel("Gate opened! Stage 3 unlocks Axe");
+        } else if (currentStage == 3) {
+            statusLabel.setLabel("Gate opened! Boss unlocks Laser Gun");
         } else {
             statusLabel.setLabel("Gate opened! Move to the exit");
         }
@@ -340,7 +422,6 @@ public class GameplayPane extends GraphicsPane {
                     handleStageCleared();
                 }
 
-
                 if (gateOpen && player != null && maze.isPlayerAtExit(player.getX(), player.getY())) {
                     advanceToNextStage();
                 }
@@ -412,7 +493,7 @@ public class GameplayPane extends GraphicsPane {
     }
 
     private void updateWeaponLabel() {
-        weaponLabel.setLabel("Current Weapon: " + player.getWeapon().getName());
+        weaponLabel.setLabel("Equipped: " + player.getWeapon().getName());
     }
 
     private void shootProjectile() {
@@ -443,7 +524,6 @@ public class GameplayPane extends GraphicsPane {
             imageFile = "laser_right.png";
         }
 
-
         Projectile p = new Projectile(startX, startY, dx, dy, player.getWeapon().getDamage(), imageFile);
 
         projectiles.add(p);
@@ -468,32 +548,25 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_D) player.setRightPressed(true);
 
         if (key == KeyEvent.VK_1) {
-            player.setWeapon(new Weapon("iron sword"));
-            updateWeaponLabel();
-            statusLabel.setLabel("Switched to Iron Sword");
+            equipWeaponIfUnlocked("iron sword", "Iron Sword");
         }
         if (key == KeyEvent.VK_2) {
-            player.setWeapon(new Weapon("laser sword"));
-            updateWeaponLabel();
-            statusLabel.setLabel("Switched to Laser Sword");
+            equipWeaponIfUnlocked("laser sword", "Laser Sword");
         }
         if (key == KeyEvent.VK_3) {
-            player.setWeapon(new Weapon("laser gun"));
-            updateWeaponLabel();
-            statusLabel.setLabel("Switched to Laser Gun");
+            equipWeaponIfUnlocked("laser gun", "Laser Gun");
         }
         if (key == KeyEvent.VK_4) {
-            player.setWeapon(new Weapon("bow and arrow"));
-            updateWeaponLabel();
-            statusLabel.setLabel("Switched to Bow and Arrow");
+            equipWeaponIfUnlocked("bow and arrow", "Bow and Arrow");
         }
         if (key == KeyEvent.VK_5) {
-            player.setWeapon(new Weapon("axe"));
-            updateWeaponLabel();
-            statusLabel.setLabel("Switched to Axe");
+            equipWeaponIfUnlocked("axe", "Axe");
         }
 
         if (key == KeyEvent.VK_SPACE) {
+            if (attackPressed) return;
+            attackPressed = true;
+
             if (!player.canAttack()) return;
 
             if (player.getWeapon().isRanged()) {
@@ -519,5 +592,6 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_S) player.setDownPressed(false);
         if (key == KeyEvent.VK_A) player.setLeftPressed(false);
         if (key == KeyEvent.VK_D) player.setRightPressed(false);
+        if (key == KeyEvent.VK_SPACE) attackPressed = false;
     }
 }

@@ -73,7 +73,6 @@ public class Player extends Entity {
 
     @Override
     public void move() {
-        // Move player based on which keys are currently being pressed
     	double newX = getX();
         double newY = getY();
 
@@ -232,7 +231,6 @@ public class Player extends Entity {
         appearance = frames;
         add(appearance);
     }
-
 
     public Weapon getWeapon() {
         return weapon;

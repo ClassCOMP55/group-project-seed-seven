@@ -11,35 +11,35 @@ public class Weapon {
         switch (type.toLowerCase()) {
             case "laser sword":
                 name = "Laser Sword";
-                damage = 25;
+                damage = 22;
                 cooldown = 1;
                 range = 50;
                 break;
 
             case "laser gun":
                 name = "Laser Gun";
-                damage = 18;
+                damage = 14;
                 cooldown = 2;
                 range = 180;
                 break;
 
             case "iron sword":
                 name = "Iron Sword";
-                damage = 20;
+                damage = 11;
                 cooldown = 1;
                 range = 45;
                 break;
 
             case "bow and arrow":
                 name = "Bow and Arrow";
-                damage = 15;
+                damage = 10;
                 cooldown = 2;
                 range = 160;
                 break;
 
             case "axe":
                 name = "Axe";
-                damage = 30;
+                damage = 18;
                 cooldown = 3;
                 range = 40;
                 break;
