@@ -11,8 +11,8 @@ public class SettingsPane extends GraphicsPane{
 	@Override
 	public void showContent() {
 		addBackground();
-		addText();
 		addBackButton();
+		addText();
 	}
 
 	@Override
@@ -33,17 +33,17 @@ public class SettingsPane extends GraphicsPane{
 	}
 	
 	private void addText() {
-		GLabel text = new GLabel("This is an example of a new screen with some description!", 100, 70);
+		GLabel text = new GLabel("Nothing to see here :)", 100, 70);
 		text.setColor(Color.BLUE);
 		text.setFont("DialogInput-PLAIN-24");
-		text.setLocation((mainScreen.getWidth() - text.getWidth()) / 2, 70);
+		text.setLocation((mainScreen.getWidth() - text.getWidth()) / 2, 350);
 		
 		contents.add(text);
 		mainScreen.add(text);
 	}
 	
 	private void addBackButton() {
-		GImage backButton = new GImage("back.jpg", 200, 400);
+		GImage backButton = new GImage("back_button.png", 200, 400);
 		backButton.scale(0.3, 0.3);
 		backButton.setLocation((mainScreen.getWidth() - backButton.getWidth())/ 2, 400);
 		
