@@ -59,9 +59,9 @@ public class Enemy extends Entity {
                 break;
 
             case MUTANT:
-                this.health = 205;
+                this.health = 500;
                 this.damage = 32;
-                this.speed = 1.15f;
+                this.speed = 2.0f;
                 this.attackRange = 30;
                 this.attackCooldownTimer = 0;
                 break;
