@@ -33,6 +33,20 @@ public class GameplayPane extends GraphicsPane {
     
     private String imageFile;
     private boolean attackPressed = false;
+    
+    private GImage inventoryBar;
+    private GImage[] barStates = new GImage[5];
+    private GImage currentBar;
+    
+    private GImage[] weaponIcons = new GImage[5];
+    
+    private double barX;
+    private double barY;
+    
+    private double[] slotX = new double[5];
+    private double[] slotY = new double[5];
+    
+    private boolean[] weaponUnlocked = new boolean[5];
 
     public GameplayPane(MainApplication mainScreen) {
         this.mainScreen = mainScreen;
@@ -90,6 +104,7 @@ public class GameplayPane extends GraphicsPane {
     private void loadStage(int stage) {
         clearScreenContents();
 
+        loadInventoryBarImages();
         addBackground();
         buildMazeForStage(stage);
         addLabels();
@@ -115,12 +130,25 @@ public class GameplayPane extends GraphicsPane {
 
         if (stage == 1) {
             maze.build(Maze.EASY);
+            weaponUnlocked[0] = true;
         } else if (stage == 2) {
             maze.build(Maze.MEDIUM);
+            weaponUnlocked[0] = true;
+            weaponUnlocked[1] = true;
+            weaponUnlocked[3] = true;
         } else if (stage == 3) {
             maze.build(Maze.HARD);
+            weaponUnlocked[0] = true;
+            weaponUnlocked[1] = true;
+            weaponUnlocked[3] = true;
+            weaponUnlocked[4] = true;
         } else {
             maze.build(Maze.BOSS);
+            weaponUnlocked[0] = true;
+            weaponUnlocked[1] = true;
+            weaponUnlocked[2] = true;
+            weaponUnlocked[3] = true;
+            weaponUnlocked[4] = true;
         }
 
         double mazeX = (mainScreen.getWidth() - maze.getMazeWidth()) / 2.0;
@@ -128,7 +156,75 @@ public class GameplayPane extends GraphicsPane {
 
         maze.setRenderPosition(mazeX, mazeY);
         maze.renderTo(mainScreen, contents);
+        
+        buildInventoryBar();
     }
+    
+    private void loadInventoryBarImages() {
+        barStates[0] = new GImage("inve_1.png");
+        barStates[1] = new GImage("inve_2.png");
+        barStates[2] = new GImage("inve_3.png");
+        barStates[3] = new GImage("inve_4.png");
+        barStates[4] = new GImage("inve_5.png");
+        
+        double targetScale = 0.5;
+        
+
+        for (int i = 0; i < 5; i++) {
+            barStates[i].scale(targetScale, targetScale);
+            
+        }
+
+    }
+
+    
+    private void buildInventoryBar() {
+    	
+        currentBar = barStates[0];
+
+        double barX = 8;
+        double barY = mainScreen.getGCanvas().getHeight() - currentBar.getHeight() - 20;
+
+        currentBar.setLocation(barX, barY);
+
+        mainScreen.add(currentBar);
+        contents.add(currentBar);
+        
+        slotX[0] = barX + 5;
+        slotX[1] = barX + 5;
+        slotX[2] = barX + 5;
+        slotX[3] = barX + 5;
+        slotX[4] = barX + 5;
+
+        slotY[0] = barY + 134;
+        slotY[1] = barY + 102;
+        slotY[2] = barY + 69;
+        slotY[3] = barY + 38;
+        slotY[4] = barY + 6;
+        
+        if (weaponUnlocked[0]) addWeaponIcon(0, "weapon_sword.png");
+        if (weaponUnlocked[1]) addWeaponIcon(1, "weapon_lsrswrd.png");
+        if (weaponUnlocked[2]) addWeaponIcon(2, "weapon_lsrgun.png");
+        if (weaponUnlocked[3]) addWeaponIcon(3, "weapon_bowarrow.png");
+        if (weaponUnlocked[4]) addWeaponIcon(4, "weapon_axe.png");
+    }
+    
+    private void addWeaponIcon(int slot, String imageFile) {
+        GImage icon = new GImage(imageFile);
+
+        icon.scale(0.04, 0.04);
+
+        icon.setLocation(
+            slotX[slot],
+            slotY[slot]
+        );
+
+        weaponIcons[slot] = icon;
+
+        mainScreen.add(icon);
+        contents.add(icon);
+    }
+
 
     private void addLabels() {
         double leftX = 18;
@@ -562,6 +658,33 @@ public class GameplayPane extends GraphicsPane {
         if (key == KeyEvent.VK_5) {
             equipWeaponIfUnlocked("axe", "Axe");
         }
+        
+        if (key >= KeyEvent.VK_1 && key <= KeyEvent.VK_5) {
+
+            int index = key - KeyEvent.VK_1; 
+
+            if (currentBar != null) {
+                mainScreen.remove(currentBar);
+                contents.remove(currentBar);
+            }
+
+            currentBar = barStates[index];
+
+            double x = 8;
+            double y = mainScreen.getGCanvas().getHeight() - currentBar.getHeight() - 20;
+
+            currentBar.setLocation(x, y);
+
+            mainScreen.add(currentBar);
+            contents.add(currentBar);
+            
+            for (int i = 0; i < 5; i++) {
+            	if (weaponIcons[i] != null) {
+                    mainScreen.add(weaponIcons[i]);
+                }
+            }
+        }
+
 
         if (key == KeyEvent.VK_SPACE) {
             if (attackPressed) return;
